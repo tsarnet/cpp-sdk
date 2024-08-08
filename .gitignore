@@ -399,9 +399,11 @@ FodyWeavers.xsd
 
 # cmake
 out/
+output/
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
 *.vcxproj
 *.vcxproj.filters
 *.sln
+_deps/
