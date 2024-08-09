@@ -205,7 +205,7 @@ namespace tsar
     {
         if ( const auto k = base64::safe_from_base64( client_key ) )
             pub_key = *k;
-
-        throw error( error_code_t::failed_to_decode_public_key_t );
+        else
+            throw error( error_code_t::failed_to_decode_public_key_t );
     }
 }  // namespace tsar
