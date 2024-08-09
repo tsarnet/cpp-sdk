@@ -1,6 +1,11 @@
 #include "tsar.hpp"
 
 #include <httplib.h>
+#include <openssl/bio.h>
+#include <openssl/ec.h>
+#include <openssl/err.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
 
 #include <format>
 #include <print>
@@ -41,15 +46,13 @@ namespace tsar
         if ( !json[ "signature" ].is_string() )
             return std::unexpected( error( error_code_t::failed_to_get_signature_t ) );
 
-        const auto signature = json[ "signature" ].get< std::string >();
+        const auto signature = base64::from_base64( json[ "signature" ].get< std::string >() );
+        const auto data = base64::safe_from_base64( json[ "data" ].get< std::string >() );
 
-        const auto base64_data = json[ "data" ].get< std::string >();
-        const auto data_bytes = base64::safe_from_base64( base64_data );
-
-        if ( !data_bytes )
+        if ( !data )
             return std::unexpected( error( error_code_t::failed_to_decode_data_t ) );
 
-        const auto data_json = nlohmann::json::parse( *data_bytes, nullptr, false );
+        const auto data_json = nlohmann::json::parse( *data, nullptr, false );
 
         if ( data_json.is_discarded() )
             return std::unexpected( error( error_code_t::failed_to_parse_body_t ) );
@@ -72,11 +75,28 @@ namespace tsar
         // Calculate the duration between the NTP timestamp and the system time.
         const auto duration = std::chrono::seconds( ntp_timestamp > system_time ? ntp_timestamp - system_time : system_time - ntp_timestamp );
 
-        // If the duration is greate than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
+        // If the duration is greater than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
         if ( duration > std::chrono::seconds( 30 ) || timestamp < ( system_time - 30u ) )
             return std::unexpected( error( error_code_t::old_response_t ) );
 
+        if ( !verify_signature( *data, signature ) )
+            return std::unexpected( error( error_code_t::invalid_signature_t ) );
+
         return data_json;
+    }
+
+    bool client::verify_signature( const std::string_view json, const std::string_view signature ) const noexcept
+    {
+        // Compute the SHA256 hash of the JSON data.
+        const auto digest = SHA256( reinterpret_cast< const std::uint8_t* >( json.data() ), json.length(), nullptr );
+
+        // Create the EC_KEY object from the client key.
+        const auto bio = BIO_new_mem_buf( client_key.data(), client_key.length() );
+        const auto key = PEM_read_bio_EC_PUBKEY( bio, nullptr, nullptr, nullptr );
+
+        return ECDSA_verify(
+                   0, digest, SHA256_DIGEST_LENGTH, reinterpret_cast< const std::uint8_t* >( signature.data() ), signature.length(), key ) ==
+               1;
     }
 
     std::unique_ptr< client > client::create( const std::string_view app_id, const std::string_view client_key, const std::string_view hostname )

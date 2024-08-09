@@ -106,6 +106,11 @@ namespace tsar
         old_response_t,
 
         /// <summary>
+        /// Signature is not authentic. Data may have been tampered with.
+        /// </summary>
+        invalid_signature_t,
+
+        /// <summary>
         /// An unexpected error occurred.
         /// </summary>
         unexpected_error_t

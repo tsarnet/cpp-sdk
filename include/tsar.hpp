@@ -40,6 +40,11 @@ namespace tsar
         /// </summary>
         result_t< nlohmann::json > query( const std::string_view endpoint ) noexcept;
 
+        /// <summary>
+        /// Verifies the signature of the JSON data using the ECDSA algorithm.
+        /// </summary>
+        bool verify_signature( const std::string_view json, const std::string_view signature ) const noexcept;
+
        public:
         /// <summary>
         /// Creates a new TSAR client with the specified app ID, client key, and hostname.

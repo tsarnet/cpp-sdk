@@ -44,6 +44,7 @@ namespace tsar
             case error_code_t::failed_to_parse_timestamp_t: return "Failed to parse timestamp field into uint64_t.";
             case error_code_t::hwid_mismatch_t: return "Local HWID and HWID returned from server dont match.";
             case error_code_t::old_response_t: return "Response is old.";
+            case error_code_t::invalid_signature_t: return "Signature is not authentic.";
 
             case error_code_t::unexpected_error_t:
             default: return "An unexpected error occurred.";
