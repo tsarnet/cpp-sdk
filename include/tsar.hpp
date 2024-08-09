@@ -13,13 +13,59 @@
 
 namespace tsar
 {
-    struct validation_data_t;
 
     /// <summary>
     /// The result type for the TSAR API.
     /// </summary>
     template< typename T >
     using result_t = std::expected< T, error >;
+
+    /// <summary>
+    /// Represents a user in the TSAR API.
+    /// </summary>
+    struct user_t
+    {
+        /// <summary>
+        /// The user identifier.
+        /// </summary>
+        std::string id;
+
+        /// <summary>
+        /// The user's username.
+        /// </summary>
+        std::optional< std::string > username;
+
+        /// <summary>
+        /// The user's avatar URL.
+        /// </summary>
+        std::optional< std::string > avatar;
+    };
+
+    /// <summary>
+    /// Represents a subscription in the TSAR API.
+    /// </summary>
+    struct subscription_t
+    {
+        /// <summary>
+        /// The subscription identifier.
+        /// </summary>
+        std::string id;
+
+        /// <summary>
+        /// Timestamp of when the subscription expires
+        /// </summary>
+        std::optional< std::chrono::system_clock::time_point > expires;
+
+        /// <summary>
+        /// The user associated with the subscription.
+        /// </summary>
+        user_t user;
+
+        /// <summary>
+        /// The tier of the user's subscription, set by the app's purchase flow. Default is 0.
+        /// </summary>
+        std::uint32_t tier;
+    };
 
     /// <summary>
     /// The TSAR client class. This class interacts with the API after it has been initialized.
@@ -29,6 +75,16 @@ namespace tsar
         std::string app_id, pub_key, hwid;
         httplib::Client http_client;
         NTPClient ntp_client;
+
+        /// <summary>
+        /// The session identifier for the current client.
+        /// </summary>
+        std::string session;
+
+        /// <summary>
+        /// The subscription for the current client.
+        /// </summary>
+        subscription_t subscription;
 
         /// <summary>
         /// Creates a new TSAR client with the specified app ID, client key, and hardware ID.
@@ -64,25 +120,20 @@ namespace tsar
         static std::unique_ptr< client > create( const std::string_view app_id, const std::string_view client_key );
 
         /// <summary>
-        /// Validates the current client session.
+        /// Validates the current session. Returns true if the session is valid.
         /// </summary>
-        /// <returns></returns>
-        result_t< validation_data_t > validate();
-    };
-
-    /// <summary>
-    /// Data returned by the server when validating a client session.
-    /// </summary>
-    struct validation_data_t
-    {
-        /// <summary>
-        /// The hardware ID of the client.
-        /// </summary>
-        std::string hwid;
+        bool validate();
 
         /// <summary>
-        /// The timestamp of the validation.
+        /// Gets the current subscription for the client.
         /// </summary>
-        std::uint64_t timestamp;
+        constexpr subscription_t& get_subscription() noexcept
+        {
+            return subscription;
+        }
     };
+
+    void from_json( const nlohmann::json& j, user_t& u );
+    void from_json( const nlohmann::json& j, subscription_t& s );
+
 }  // namespace tsar

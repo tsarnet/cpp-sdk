@@ -75,6 +75,8 @@ namespace tsar
         // Calculate the duration between the NTP timestamp and the system time.
         const auto duration = std::chrono::seconds( ntp_timestamp > system_time ? ntp_timestamp - system_time : system_time - ntp_timestamp );
 
+        std::cout << "Duration: " << duration.count() << " seconds" << std::endl;
+
         // If the duration is greater than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
         if ( duration > std::chrono::seconds( 30 ) || timestamp < ( system_time - 30u ) )
             return std::unexpected( error( error_code_t::old_response_t ) );
@@ -184,6 +186,9 @@ namespace tsar
             }
         }
 
+        c->session = ( *result )[ "session" ].get< std::string >();
+        c->subscription = ( *result )[ "subscription" ].template get< subscription_t >();
+
         return c;
     }
 
@@ -192,9 +197,25 @@ namespace tsar
         return create( app_id, client_key, std::format( "{}.tsar.app", app_id ) );
     }
 
-    result_t< validation_data_t > client::validate()
+    bool client::validate()
     {
-        return result_t< validation_data_t >();
+        const auto result = query( std::format( "validate?app={}&session={}&hwid={}", app_id, session, hwid ) );
+
+        if ( !result )
+        {
+            switch ( static_cast< error_code_t >( result.error().code().value() ) )
+            {
+                case error_code_t::unauthorized_t:
+                {
+                    // If the user is suddenly unauthorized then we return false because the session is no longer expired.
+                    return false;
+                }
+
+                default: throw result.error();
+            }
+        }
+
+        return true;
     }
 
     client::client( const std::string_view app_id, const std::string_view client_key, const std::string_view hwid )
@@ -207,5 +228,33 @@ namespace tsar
             pub_key = *k;
         else
             throw error( error_code_t::failed_to_decode_public_key_t );
+    }
+
+    void from_json( const nlohmann::json& j, user_t& u )
+    {
+        j.at( "id" ).get_to( u.id );
+
+        if ( !j[ "username" ].is_null() )
+            u.username = j.at( "username" ).get< std::string >();
+        else
+            u.username = std::nullopt;
+
+        if ( !j[ "avatar" ].is_null() )
+            u.avatar = j.at( "avatar" ).get< std::string >();
+        else
+            u.avatar = std::nullopt;
+    }
+
+    void from_json( const nlohmann::json& j, subscription_t& s )
+    {
+        j.at( "id" ).get_to( s.id );
+
+        if ( !j[ "expires" ].is_null() )
+            s.expires = std::chrono::system_clock::from_time_t( j.at( "expires" ).get< uint64_t >() );
+        else
+            s.expires = std::nullopt;
+
+        j.at( "user" ).get_to( s.user );
+        j.at( "tier" ).get_to( s.tier );
     }
 }  // namespace tsar
