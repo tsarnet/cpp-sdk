@@ -26,7 +26,7 @@ namespace tsar
     /// </summary>
     class client
     {
-        std::string app_id, client_key, hwid;
+        std::string app_id, pub_key, hwid;
         httplib::Client http_client;
         NTPClient ntp_client;
 

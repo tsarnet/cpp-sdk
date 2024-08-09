@@ -77,9 +77,9 @@ struct NTPClient
      * @brief Transmits an NTP request to the defined server and returns the
      * timestamp
      *
-     * @return (uint64_t) the number of seconds since 1970. Return 0 if fail.
+     * @return (time_t) the number of seconds since 1970. Return 0 if fail.
      */
-    uint64_t request_time();
+    time_t request_time();
 
    private:
     /**

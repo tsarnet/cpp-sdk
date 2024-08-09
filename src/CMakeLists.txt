@@ -16,10 +16,6 @@ FetchContent_MakeAvailable (httplib)
 FetchContent_Declare (json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable (json)
 
-# Fetch and include the ntp library
-FetchContent_Declare (ntp_client GIT_REPOSITORY https://github.com/plusangel/NTP-client)
-FetchContent_MakeAvailable (ntp_client)
-
 cmake_path (SET include_dir "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
 # Add the header files to the project
@@ -47,7 +43,6 @@ target_link_libraries (tsar PUBLIC tsar_core)
 target_link_libraries (tsar PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries (tsar PUBLIC httplib::httplib)
 target_link_libraries (tsar PUBLIC nlohmann_json::nlohmann_json)
-target_link_libraries (tsar PUBLIC ntp_client)
 
 # Add the source files to the project
 target_sources (tsar PRIVATE

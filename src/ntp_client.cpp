@@ -54,7 +54,7 @@ NTPClient::~NTPClient()
 #endif
 }
 
-uint64_t NTPClient::request_time()
+time_t NTPClient::request_time()
 {
     int response;  // return result from writing/reading from the socket
 
