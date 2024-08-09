@@ -2,11 +2,19 @@
 
 #include "tsar.hpp"
 
+constexpr auto app_id = "f911842b-5b3d-4c59-b5d1-4adb8f71557b";
+constexpr auto client_key =
+    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvJrwPvdeDUcV8Qr02tzgFrp+8qfCV/vG1HcQJYYV8u5vYUfGABMAYT0qOQltXEX9DTcB2fzLfwQnl7yiAaNruQ==";
+
 int main()
 {
-    if ( const auto client = tsar::client::create( "f911842b-5b3d-4c59-b5d1-4adb8f71557b", "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvJrwPvdeDUcV8Qr02tzgFrp+8qfCV/vG1HcQJYYV8u5vYUfGABMAYT0qOQltXEX9DTcB2fzLfwQnl7yiAaNruQ==" ); !client.has_value() )
+    try
     {
-        std::cerr << "Error [" << client.error().code() << "]: " << client.error().what() << std::endl;
+        const auto client = tsar::client::create( app_id, client_key );
+    }
+    catch ( const tsar::error& e )
+    {
+        std::cerr << "Error [" << e.code() << "]: " << e.what() << std::endl;
         return 1;
     }
 

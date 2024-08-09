@@ -26,6 +26,24 @@ namespace tsar
         switch ( static_cast< error_code_t >( ev ) )
         {
             case error_code_t::failed_to_get_hwid_t: return "Failed to get the user's HWID.";
+            case error_code_t::failed_to_open_browser_t: return "Failed to open browser.";
+            case error_code_t::unauthorized_t: return "User is not authorized to use the application.";
+            case error_code_t::request_failed_t: return "Request to TSAR server failed.";
+            case error_code_t::app_not_found_t: return "App ID not found.";
+            case error_code_t::app_paused_t: return "App was paused by the developer.";
+            case error_code_t::user_not_found_t: return "HWID does not match to user.";
+            case error_code_t::server_error_t: return "TSAR server did not return OK.";
+            case error_code_t::failed_to_parse_body_t: return "Failed to parse body into JSON.";
+            case error_code_t::failed_to_get_data_t: return "Failed to get data field from JSON.";
+            case error_code_t::failed_to_get_signature_t: return "Failed to get signature field from JSON.";
+            case error_code_t::failed_to_decode_data_t: return "Failed to decode data field from parsed JSON body.";
+            case error_code_t::failed_to_decode_signature_t: return "Failed to decode signature field from parsed JSON body.";
+            case error_code_t::failed_to_decode_public_key_t: return "Failed to decode client key from base64.";
+            case error_code_t::failed_to_parse_data_t: return "Failed to parse data field into JSON.";
+            case error_code_t::failed_to_get_timestamp_t: return "Failed to get timestamp field.";
+            case error_code_t::failed_to_parse_timestamp_t: return "Failed to parse timestamp field into uint64_t.";
+            case error_code_t::hwid_mismatch_t: return "Local HWID and HWID returned from server dont match.";
+            case error_code_t::old_response_t: return "Response is old.";
 
             case error_code_t::unexpected_error_t:
             default: return "An unexpected error occurred.";

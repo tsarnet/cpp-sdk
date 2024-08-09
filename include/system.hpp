@@ -20,4 +20,11 @@ namespace tsar::system
     /// </summary>
     extern std::optional< std::string > hwid() noexcept;
 
+    /// <summary>
+    /// Opens a browser window with the specified URL.
+    /// </summary>
+    /// <param name="url">The URL to visit.</param>
+    /// <returns>True if successful.</returns>
+    extern bool open_browser( const std::string_view url ) noexcept;
+
 }  // namespace tsar::system

@@ -5,37 +5,115 @@
 #include <format>
 #include <print>
 
+#include "base64.hpp"
+#include "ntp_client.hpp"
 #include "system.hpp"
 
 namespace tsar
 {
-    nlohmann::json client::query( const std::string_view endpoint )
+    result_t< nlohmann::json > client::query( const std::string_view endpoint ) noexcept
     {
-        const auto result = http_client.Get( endpoint.data() );
+        const auto result = http_client.Get( std::format( "/api/client/{}", endpoint ) );
 
+        // If we are unable to make a request to the server then it is likely down. No need to do any error handling here.
         if ( !result )
+            return std::unexpected( error( error_code_t::request_failed_t ) );
+
+        switch ( result->status )
         {
+            // This is the only status code we care about.
+            case httplib::StatusCode::OK_200: break;
+
+            case httplib::StatusCode::NotFound_404: return std::unexpected( error( error_code_t::app_not_found_t ) );
+            case httplib::StatusCode::Unauthorized_401: return std::unexpected( error( error_code_t::user_not_found_t ) );
+            case httplib::StatusCode::ServiceUnavailable_503: return std::unexpected( error( error_code_t::app_paused_t ) );
+            default: return std::unexpected( error( error_code_t::server_error_t ) );
         }
 
-        std::cout << result.value().body << std::endl;
+        const auto json = nlohmann::json::parse( result->body, nullptr, false );
 
-        return result.value().body;
+        if ( json.is_discarded() )
+            return std::unexpected( error( error_code_t::failed_to_parse_body_t ) );
+
+        if ( !json[ "data" ].is_string() )
+            return std::unexpected( error( error_code_t::failed_to_get_data_t ) );
+
+        if ( !json[ "signature" ].is_string() )
+            return std::unexpected( error( error_code_t::failed_to_get_signature_t ) );
+
+        const auto signature = json[ "signature" ].get< std::string >();
+
+        const auto base64_data = json[ "data" ].get< std::string >();
+        const auto data_bytes = base64::safe_from_base64( base64_data );
+
+        if ( !data_bytes )
+            return std::unexpected( error( error_code_t::failed_to_decode_data_t ) );
+
+        const auto data_json = nlohmann::json::parse( *data_bytes, nullptr, false );
+
+        if ( data_json.is_discarded() )
+            return std::unexpected( error( error_code_t::failed_to_parse_body_t ) );
+
+        if ( !data_json[ "hwid" ].is_string() )
+            return std::unexpected( error( error_code_t::failed_to_parse_data_t ) );
+
+        if ( !data_json[ "timestamp" ].is_number_unsigned() )
+            return std::unexpected( error( error_code_t::failed_to_get_timestamp_t ) );
+
+        // Verify that the HWID matches the user's HWID.
+        if ( data_json[ "hwid" ].get< std::string >() != hwid.c_str() )
+            return std::unexpected( error( error_code_t::hwid_mismatch_t ) );
+
+        const auto timestamp = data_json[ "timestamp" ].get< uint64_t >();
+        const auto ntp_timestamp = ntp_client.request_time();
+
+        const auto system_time = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );
+
+        // Calculate the duration between the NTP timestamp and the system time.
+        const auto duration = std::chrono::seconds( ntp_timestamp > system_time ? ntp_timestamp - system_time : system_time - ntp_timestamp );
+
+        // If the duration is greate than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
+        if ( duration > std::chrono::seconds( 30 ) || timestamp < ( system_time - 30u ) )
+            return std::unexpected( error( error_code_t::old_response_t ) );
+
+        return data_json;
     }
 
-    result_t< std::unique_ptr< client > >
-    client::create( const std::string_view app_id, const std::string_view client_key, const std::string_view hostname ) noexcept
+    std::unique_ptr< client > client::create( const std::string_view app_id, const std::string_view client_key, const std::string_view hostname )
     {
         const auto hwid = system::hwid();
 
         if ( !hwid )
-            return std::unexpected( error( error_code_t::failed_to_get_hwid_t ) );
+            throw error( error_code_t::failed_to_get_hwid_t );
 
         std::unique_ptr< client > c( new client( app_id, client_key, *hwid ) );
-        std::cout << c->query( "/api/client/initialize?app={}&hwid={}", app_id, *hwid ) << std::endl;
+
+        const auto result = c->query( std::format( "initialize?app={}&hwid={}", app_id, *hwid ) );
+
+        if ( !result )
+        {
+            switch ( static_cast< error_code_t >( result.error().code().value() ) )
+            {
+                case error_code_t::user_not_found_t:
+                {
+                    // If the user is not found then we open the browser to authenticate. They will authenticate with their HWID and restart the
+                    // application.
+                    if ( !system::open_browser( std::format( "https://{}/auth/{}", hostname, *hwid ) ) )
+                        throw error( error_code_t::failed_to_open_browser_t );
+
+                    throw error( error_code_t::unauthorized_t );
+                }
+
+                default: throw result.error();
+            }
+        }
+
+        std::cout << result->dump( 4 ) << std::endl;
+
         return c;
     }
 
-    result_t< std::unique_ptr< client > > client::create( const std::string_view app_id, const std::string_view client_key ) noexcept
+    std::unique_ptr< client > client::create( const std::string_view app_id, const std::string_view client_key )
     {
         return create( app_id, client_key, std::format( "{}.tsar.app", app_id ) );
     }
@@ -49,7 +127,8 @@ namespace tsar
         : app_id( app_id ),
           client_key( client_key ),
           hwid( hwid ),
-          http_client( "https://tsar.cc" )
+          http_client( "https://tsar.cc" ),
+          ntp_client( "time.cloudflare.com", 123 )
     {
     }
 }  // namespace tsar

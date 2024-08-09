@@ -16,6 +16,96 @@ namespace tsar
         failed_to_get_hwid_t,
 
         /// <summary>
+        /// Failed to open the user's default browser.
+        /// </summary>
+        failed_to_open_browser_t,
+
+        /// <summary>
+        /// User is not authorized to use the application.
+        /// </summary>
+        unauthorized_t,
+
+        /// <summary>
+        /// Request to the TSAR server failed, server may be down.
+        /// </summary>
+        request_failed_t,
+
+        /// <summary>
+        /// The APP ID passed does not match to a TSAR APP.
+        /// </summary>
+        app_not_found_t,
+
+        /// <summary>
+        /// The APP you're trying to use is paused by the developer.
+        /// </summary>
+        app_paused_t,
+
+        /// <summary>
+        /// The HWID passed does not match to a user.
+        /// </summary>
+        user_not_found_t,
+
+        /// <summary>
+        /// TSAR server had an error and did not return an OK status.
+        /// </summary>
+        server_error_t,
+
+        /// <summary>
+        /// Failed to parse returned body into JSON.
+        /// </summary>
+        failed_to_parse_body_t,
+
+        /// <summary>
+        /// Failed to get the `data` field from the parsed JSON body.
+        /// </summary>
+        failed_to_get_data_t,
+
+        /// <summary>
+        /// Failed to get the `signature` field from the parsed JSON body.
+        /// </summary>
+        failed_to_get_signature_t,
+
+        /// <summary>
+        /// Failed to decode the `data` field from the parsed JSON body.
+        /// </summary>
+        failed_to_decode_data_t,
+
+        /// <summary>
+        /// Failed to decode the `signature` field from the parsed JSON body.
+        /// </summary>
+        failed_to_decode_signature_t,
+
+        /// <summary>
+        /// Failed to decode the client key from base64.
+        /// </summary>
+        failed_to_decode_public_key_t,
+
+        /// <summary>
+        /// Failed to parse the `data` field into JSON.
+        /// </summary>
+        failed_to_parse_data_t,
+
+        /// <summary>
+        /// Failed to get the `timestamp` field.
+        /// </summary>
+        failed_to_get_timestamp_t,
+
+        /// <summary>
+        /// Failed to parse the `timestamp` field into uint64_t.
+        /// </summary>
+        failed_to_parse_timestamp_t,
+
+        /// <summary>
+        /// Local HWID and HWID returned from server dont match.
+        /// </summary>
+        hwid_mismatch_t,
+
+        /// <summary>
+        /// The response is old. Data may have been tampered with.
+        /// </summary>
+        old_response_t,
+
+        /// <summary>
         /// An unexpected error occurred.
         /// </summary>
         unexpected_error_t

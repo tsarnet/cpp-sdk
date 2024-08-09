@@ -1,5 +1,10 @@
 include(FetchContent)
 
+if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+	set(CMAKE_TOOLCHAIN_FILE "C:/Program Files/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+	message(" [INFO] VCPKG CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
+endif()
+
 # Find OpenSSL
 find_package(OpenSSL REQUIRED)
 
@@ -11,13 +16,19 @@ FetchContent_MakeAvailable (httplib)
 FetchContent_Declare (json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 FetchContent_MakeAvailable (json)
 
+# Fetch and include the ntp library
+FetchContent_Declare (ntp_client GIT_REPOSITORY https://github.com/plusangel/NTP-client)
+FetchContent_MakeAvailable (ntp_client)
+
 cmake_path (SET include_dir "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 
 # Add the header files to the project
 set (header_files 
+	"${include_dir}/base64.hpp"
 	"${include_dir}/tsar.hpp"
 	"${include_dir}/error.hpp"
-	"${include_dir}/system.hpp")
+	"${include_dir}/system.hpp"
+	"${include_dir}/ntp_client.hpp")
 
 # Add the library to the project
 add_library (tsar_core INTERFACE)
@@ -33,15 +44,17 @@ target_include_directories(tsar_core SYSTEM INTERFACE
 
 add_library (tsar STATIC)
 target_link_libraries (tsar PUBLIC tsar_core)
-target_link_libraries (tsar PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries (tsar PRIVATE httplib::httplib)
-target_link_libraries (tsar PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries (tsar PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries (tsar PUBLIC httplib::httplib)
+target_link_libraries (tsar PUBLIC nlohmann_json::nlohmann_json)
+target_link_libraries (tsar PUBLIC ntp_client)
 
 # Add the source files to the project
 target_sources (tsar PRIVATE
 	"tsar.cpp"
 	"error.cpp"
 	"system.cpp"
+	"ntp_client.cpp"
 )
 
 # Add the include directories

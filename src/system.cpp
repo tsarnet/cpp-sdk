@@ -12,4 +12,9 @@ namespace tsar::system
 
         return std::string( szBuffer, dwSize );
     }
+
+    bool open_browser( const std::string_view url ) noexcept
+    {
+        return reinterpret_cast< std::uintptr_t >( ShellExecute( NULL, "open", url.data(), NULL, NULL, SW_SHOWNORMAL ) ) > 32;
+    }
 }  // namespace tsar::system
