@@ -4,6 +4,7 @@
 > The lastest build of the C++ SDK will only compile if building a Windows application. We are currently working on supporting other systems like Unix/Linux and MacOS.
 
 * [Installation](#installation)
+* [Usage](#usage)
 * [Contributing](#contributing)
 * [Need help?](#need-help)
 
