@@ -1,12 +1,12 @@
 #include "ntp_client.hpp"
 
-#include <stdio.h>
 #include <sys/types.h>
 
 #include <cstring>
 #include <iostream>
 #ifdef _WIN32
 #include <WinSock2.h>
+#include <Ws2tcpip.h>  // For getaddrinfo and inet_ntop
 #define close( X ) closesocket( X )
 #else
 #include <arpa/inet.h>
@@ -17,12 +17,14 @@
 #include <string.h>
 #include <time.h>
 
+#include <chrono>
+
 NTPClient::NTPClient( std::string hostname, uint16_t port ) : hostname_( hostname ), port_( port ), socket_fd( 0 ), socket_client{}
 {
 #ifdef _WIN32
     WSADATA wsaData = { 0 };
     ( void )WSAStartup( MAKEWORD( 2, 2 ), &wsaData );
-#endif;
+#endif
 }
 
 void NTPClient::build_connection()
@@ -35,14 +37,18 @@ void NTPClient::build_connection()
 
     const auto ntp_server_ip = hostname_to_ip( hostname_ );
 
+    if ( ntp_server_ip.empty() )
+        return;
+
     timeval timeout_time_value{};
-    timeout_time_value.tv_sec = 5;  // timeout in seconds
-    setsockopt( socket_fd, SOL_SOCKET, SO_RCVTIMEO, ( const char * )&timeout_time_value, sizeof( timeout_time_value ) );
+    timeout_time_value.tv_sec = 30;  // timeout in seconds
+    setsockopt( socket_fd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
+    setsockopt( socket_fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
 
     // Filling server information
     socket_client.sin_family = AF_INET;
     socket_client.sin_port = htons( port_ );
-    socket_client.sin_addr.s_addr = inet_addr( ntp_server_ip.c_str() );
+    inet_pton( AF_INET, ntp_server_ip.c_str(), &socket_client.sin_addr );
 }
 
 NTPClient::~NTPClient()
@@ -60,30 +66,26 @@ time_t NTPClient::request_time()
 
     build_connection();
 
-    if ( connect( socket_fd, ( struct sockaddr * )&socket_client, sizeof( socket_client ) ) < 0 )
+    if ( connect( socket_fd, reinterpret_cast< struct sockaddr * >( &socket_client ), sizeof( socket_client ) ) < 0 )
         return 0;
 
-    NTPPacket packet = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    packet.li_vn_mode = 0x1b;
+    NTPPacket packet{};
+    packet.li_vn_mode = 0x23;
 
-#ifdef _WIN32
-    response = sendto( socket_fd, ( char * )&packet, sizeof( NTPPacket ), 0, ( struct sockaddr * )&socket_client, sizeof( socket_client ) );
-#else
-    response = write( socket_fd, ( char * )&packet, sizeof( NTPPacket ) );
-#endif
-
+    response = sendto(
+        socket_fd,
+        reinterpret_cast< const char * >( &packet ),
+        sizeof( NTPPacket ),
+        0,
+        reinterpret_cast< struct sockaddr * >( &socket_client ),
+        sizeof( socket_client ) );
     if ( response < 0 )
         return 0;
 
     // reset the packet buffer
     memset( &packet, 0, sizeof( NTPPacket ) );
-
-#ifdef _WIN32
-    response = recv( socket_fd, ( char * )&packet, sizeof( NTPPacket ), 0 );
-#else
-    response = read( socket_fd, ( char * )&packet, sizeof( NTPPacket ) );
-#endif
-
+    
+    response = recvfrom( socket_fd, reinterpret_cast< char * >( &packet ), sizeof( NTPPacket ), 0, nullptr, nullptr );
     if ( response < 0 )
     {
         close_socket();
@@ -112,9 +114,25 @@ time_t NTPClient::request_time()
 
 std::string NTPClient::hostname_to_ip( const std::string &host )
 {
-    hostent *hostname = gethostbyname( host.c_str() );
-    if ( hostname )
-        return std::string( inet_ntoa( **( in_addr ** )hostname->h_addr_list ) );
+    addrinfo hints{}, *res = nullptr;
+    hints.ai_family = AF_INET;       // IPv4
+    hints.ai_socktype = SOCK_DGRAM;  // Datagram socket (UDP)
+
+    int status = getaddrinfo( host.c_str(), nullptr, &hints, &res );
+    if ( status != 0 )
+    {
+        std::cerr << "Error resolving hostname: " << gai_strerror( status ) << std::endl;
+        return {};
+    }
+
+    char ip_str[ INET_ADDRSTRLEN ];
+    if ( res )
+    {
+        inet_ntop( AF_INET, &( reinterpret_cast< sockaddr_in * >( res->ai_addr )->sin_addr ), ip_str, INET_ADDRSTRLEN );
+        freeaddrinfo( res );
+        return std::string( ip_str );
+    }
+
     return {};
 }
 

@@ -75,8 +75,6 @@ namespace tsar
         // Calculate the duration between the NTP timestamp and the system time.
         const auto duration = std::chrono::seconds( ntp_timestamp > system_time ? ntp_timestamp - system_time : system_time - ntp_timestamp );
 
-        std::cout << "Duration: " << duration.count() << " seconds" << std::endl;
-
         // If the duration is greater than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
         if ( duration > std::chrono::seconds( 30 ) || timestamp < ( system_time - 30u ) )
             return std::unexpected( error( error_code_t::old_response_t ) );

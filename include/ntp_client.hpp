@@ -86,7 +86,7 @@ struct NTPClient
      * @brief Converts from hostname to ip address
      *
      * @param hostname name of the host.
-     * @return ip address. Return empty string if coun't find the ip.
+     * @return ip address. Return empty string if can't find the ip.
      */
     std::string hostname_to_ip( const std::string &hostname );
 
