@@ -40,10 +40,10 @@ void NTPClient::build_connection()
     if ( ntp_server_ip.empty() )
         return;
 
-    timeval timeout_time_value{};
-    timeout_time_value.tv_sec = 30;  // timeout in seconds
-    setsockopt( socket_fd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
-    setsockopt( socket_fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
+    //timeval timeout_time_value{};
+    //timeout_time_value.tv_sec = 30;  // timeout in seconds
+    //setsockopt( socket_fd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
+    //setsockopt( socket_fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
 
     // Filling server information
     socket_client.sin_family = AF_INET;
