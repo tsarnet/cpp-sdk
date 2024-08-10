@@ -16,10 +16,17 @@ jobs:
         run: cmake . -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=OFF
       - name: Package source code
         run: cmake --build . --target ALL_BUILD
-
-      - name: Add packaged source code to release
+      - name: Create windows directory
+        run: cmake -E make_directory windows
+      - name: Copy include directory
+        run: cmake -E copy_directory include windows/include
+      - name: Copy .lib file
+        run: cmake -E copy lib/Release/tsar.lib windows/tsar.lib
+      - name: Create zip archive
+        run: cmake -E tar cfz windows.zip --format=zip windows
+      - name: Add windows package to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/tsar-src.zip
+          file: windows.zip
           tag: ${{ github.ref }}
