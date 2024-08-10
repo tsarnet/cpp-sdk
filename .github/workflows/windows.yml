@@ -12,6 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install OpenSSL
+        run: |
+          curl -L -o openssl.zip https://slproweb.com/download/Win64OpenSSL_Light-3_3_1.msi
+          Start-Process msiexec.exe -ArgumentList '/i openssl.zip /quiet /norestart' -NoNewWindow -Wait
+          echo "::add-path::C:\Program Files\OpenSSL-Win64\bin"
       - name: Configure
         run: cmake . -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=OFF
       - name: Package source code
