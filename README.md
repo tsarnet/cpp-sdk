@@ -23,4 +23,4 @@ target_link_libraries(your_project PRIVATE tsar_sdk::tsar_sdk)
 This library requires [OpenSSL](https://www.openssl.org/), a package that should already be installed on your system. If you get a build error regarding OpenSSL, you can install it via a package manager like [vcpkg](https://vcpkg.io/) or [conan](https://conan.io/).
 
 ## Contributing
-This project definitely has room for improvement, so we are open to any contribution! Feel free to send a pull request at any time and we will review it ASAP. If you want to contribute but don't know what, take a quick look at our [issues](/issues) and feel free to take on any of them.
+This project definitely has room for improvement, so we are open to any contribution! Feel free to send a pull request at any time and we will review it ASAP. If you want to contribute but don't know what, take a quick look at our [issues](https://github.com/tsarnet/cpp-sdk-v2/issues) and feel free to take on any of them.
