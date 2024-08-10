@@ -16,11 +16,11 @@ If you are using CMake, simply add the following lines to your `CMakeLists.txt` 
 include (FetchContent) # if you don't have this already
 
 # Fetch the latest version of the SDK
-FetchContent_Declare (tsar URL https://github.com/tsarnet/cpp-sdk/releases/download/v1.0/tsar.tar.xz)
+FetchContent_Declare (tsar URL https://github.com/tsarnet/cpp-sdk/releases/download/v1.0/tsar-src.zip)
 FetchContent_MakeAvailable (tsar)
 
 # Link the SDK into your project
-target_link_libraries(your_project PRIVATE tsar_sdk::tsar_sdk)
+target_link_libraries(your_project PRIVATE tsar)
 ```
 This library requires [OpenSSL](https://www.openssl.org/), a package that should already be installed on your system. If you get a build error regarding OpenSSL, you can install it via a package manager like [vcpkg](https://vcpkg.io/) or [conan](https://conan.io/).
 
