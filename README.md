@@ -71,4 +71,4 @@ int main()
 This project definitely has room for improvement, so we are open to any contribution! Feel free to send a pull request at any time and we will review it ASAP. If you want to contribute but don't know what, take a quick look at our [issues](https://github.com/tsarnet/cpp-sdk-v2/issues) and feel free to take on any of them.
 
 ### Need help?
-Join our [discord community](https://discord.com/invite/JReXjQCVPw) if you have any questions. For other contact options, please [visit here](https://tsar.cc/about/social).
+Join our [discord community](https://discord.com/invite/5xKTNFdQ) if you have any questions. For other contact options, please [visit here](https://tsar.cc/about/social).
