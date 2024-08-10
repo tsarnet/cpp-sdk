@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
@@ -16,10 +16,7 @@ jobs:
         run: cmake -E make_directory build
       - name: Configure
         working-directory: build/
-        run: cmake -DCMAKE_BUILD_TYPE=Release $GITHUB_WORKSPACE
-      - name: Build static libraries
-        working-directory: build/
-        run: cmake --build . --config Release --target all
+        run: cmake $GITHUB_WORKSPACE
       - name: Package source code
         working-directory: build/
         run: cmake --build . --target tsar_package
@@ -29,10 +26,4 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/tsar-src.zip
-          tag: ${{ github.ref }}
-      - name: Add .lib files
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/lib/Release/tsar.lib
           tag: ${{ github.ref }}
