@@ -3,15 +3,13 @@ cmake_minimum_required (VERSION 3.8)
 # Set our C++ standard
 set (CMAKE_CXX_STANDARD 23)
 
-#set(OPENSSL_ROOT_DIR "C:\\Program Files\\vcpkg\\installed\\x64-windows")
-
 # Set the project name
 project (tsar LANGUAGES CXX)
 
 # Set CMake output directories 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Define the library targets
 add_subdirectory (src)
