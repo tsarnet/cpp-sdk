@@ -1,5 +1,3 @@
-#include <iostream>
-
 #include "tsar.hpp"
 
 constexpr auto app_id = "f911842b-5b3d-4c59-b5d1-4adb8f71557b";
