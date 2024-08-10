@@ -16,7 +16,7 @@ jobs:
         run: cmake -E make_directory build
       - name: Configure
         working-directory: build/
-        run: cmake $GITHUB_WORKSPACE
+        run: cmake $GITHUB_WORKSPACE -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=OFF
       - name: Package source code
         working-directory: build/
         run: cmake --build . --target tsar_package
