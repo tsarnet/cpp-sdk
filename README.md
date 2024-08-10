@@ -5,6 +5,7 @@
 
 * [Installation](#installation)
 * [Contributing](#contributing)
+* [Need help?](#need-help)
 
 ## Installation
 This is a [CMake](https://cmake.org/) project so it is recommended to use CMake to install the SDK into your wider project. Although, you are free to download the prebuilt static libraries from any of the latest releases.
@@ -24,3 +25,6 @@ This library requires [OpenSSL](https://www.openssl.org/), a package that should
 
 ## Contributing
 This project definitely has room for improvement, so we are open to any contribution! Feel free to send a pull request at any time and we will review it ASAP. If you want to contribute but don't know what, take a quick look at our [issues](https://github.com/tsarnet/cpp-sdk-v2/issues) and feel free to take on any of them.
+
+### Need help?
+Join our [discord community](https://discord.com/invite/JReXjQCVPw) if you have any questions. For other contact options, please [visit here](https://tsar.cc/about/social).
