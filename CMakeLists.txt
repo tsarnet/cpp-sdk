@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.8)
 # Set our C++ standard
 set (CMAKE_CXX_STANDARD 23)
 
-set(OPENSSL_ROOT_DIR "C:\\Program Files\\vcpkg\\installed\\x64-windows")
+#set(OPENSSL_ROOT_DIR "C:\\Program Files\\vcpkg\\installed\\x64-windows")
 
 # Set the project name
 project (tsar LANGUAGES CXX)

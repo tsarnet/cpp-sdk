@@ -1,11 +1,6 @@
 include(FetchContent)
 
-if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-	set(CMAKE_TOOLCHAIN_FILE "C:/Program Files/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
-	message(" [INFO] VCPKG CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
-endif()
-
-# Find OpenSSL
+# Find the OpenSSL package
 find_package(OpenSSL REQUIRED)
 
 # Fetch and include the http library
