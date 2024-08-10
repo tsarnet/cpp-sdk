@@ -23,6 +23,49 @@ target_link_libraries(your_project PRIVATE tsar_sdk::tsar_sdk)
 ```
 This library requires [OpenSSL](https://www.openssl.org/), a package that should already be installed on your system. If you get a build error regarding OpenSSL, you can install it via a package manager like [vcpkg](https://vcpkg.io/) or [conan](https://conan.io/).
 
+## Usage
+We've designed this library to be lightweight and easy to use. Feel free to take a peek at any of our [examples](/examples), all of them are pretty straightforward. A simple usage example has been attached below:
+```cpp
+#include "tsar.hpp"
+
+// Get these credentials from: https://tsar.cc/app/*/settings
+constexpr auto app_id = "f911842b-5b3d-4c59-b5d1-4adb8f71557b";
+constexpr auto client_key =
+    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvJrwPvdeDUcV8Qr02tzgFrp+8qfCV/vG1HcQJYYV8u5vYUfGABMAYT0qOQltXEX9DTcB2fzLfwQnl7yiAaNruQ==";
+
+int main()
+{
+    try
+    {
+        // Create the client with the provided credentials. 
+        const auto client = tsar::client::create( app_id, client_key );
+
+        // Retrieve the subscription associated with the current user.
+        const auto& subscription = client->get_subscription();
+
+        std::println( std::cout, "[+] Authentication success, welcome {}!", subscription.user.username.value_or( "N/A" ) );
+
+        // Now we check the client's heartbeat. If this method ever returns false, then the current user's session has expired.
+        // This method sends a request to the server every time its called.
+        while ( client->validate() )
+        {
+            std::println( std::cout, "[+] Heartbeat success" );
+
+            std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+        }
+
+        std::println( std::cout, "[-] Heartbeat failed. Session has expired." );
+    }
+    catch ( const tsar::error& e )
+    {
+        std::cerr << "[-] Error [" << e.code() << "]: " << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
+``` 
+
 ## Contributing
 This project definitely has room for improvement, so we are open to any contribution! Feel free to send a pull request at any time and we will review it ASAP. If you want to contribute but don't know what, take a quick look at our [issues](https://github.com/tsarnet/cpp-sdk-v2/issues) and feel free to take on any of them.
 
