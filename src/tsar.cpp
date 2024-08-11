@@ -1,7 +1,7 @@
 #include "tsar.hpp"
 
-#include <httplib.h>
-#include <openssl/decoder.h>
+#include <curl/curl.h>
+#include <openssl/x509.h>
 
 #include <format>
 #include <print>
@@ -12,28 +12,49 @@
 
 namespace tsar
 {
+    static size_t write_callback( void* ptr, size_t size, size_t nmemb, std::string* data )
+    {
+        data->append( ( char* )ptr, size * nmemb );
+        return size * nmemb;
+    }
+
     result_t< nlohmann::json > client::query( const std::string_view endpoint ) noexcept
     {
-        const auto result = http_client.Get( std::format( "/api/client/{}", endpoint ) );
+        const auto curl = curl_easy_init();
+
+        if ( !curl )
+            return std::unexpected( error( error_code_t::unexpected_error_t ) );
+
+        curl_easy_setopt( curl, CURLOPT_URL, std::format( "https://tsar.cc/api/client/{}", endpoint ).c_str() );
+
+        std::string response;
+        curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, write_callback );
+        curl_easy_setopt( curl, CURLOPT_WRITEDATA, &response );
+
+        long status_code = 0;
+        if ( curl_easy_perform( curl ) == CURLE_OK )
+            curl_easy_getinfo( curl, CURLINFO_RESPONSE_CODE, &status_code );
+
+        curl_easy_cleanup( curl );
 
         // If we are unable to make a request to the server then it is likely down. No need to do any error handling here.
-        if ( !result )
+        if ( !status_code )
             return std::unexpected( error( error_code_t::request_failed_t ) );
 
-        switch ( result->status )
+        switch ( status_code )
         {
             // This is the only status code we care about.
-            case httplib::StatusCode::OK_200: break;
+            case 200: break;  // OK
 
-            case httplib::StatusCode::BadRequest_400: return std::unexpected( error( error_code_t::bad_request_t ) );
-            case httplib::StatusCode::NotFound_404: return std::unexpected( error( error_code_t::app_not_found_t ) );
-            case httplib::StatusCode::Unauthorized_401: return std::unexpected( error( error_code_t::user_not_found_t ) );
-            case httplib::StatusCode::TooManyRequests_429: return std::unexpected( error( error_code_t::rate_limited_t ) );
-            case httplib::StatusCode::ServiceUnavailable_503: return std::unexpected( error( error_code_t::app_paused_t ) );
+            case 400: return std::unexpected( error( error_code_t::bad_request_t ) );
+            case 404: return std::unexpected( error( error_code_t::app_not_found_t ) );
+            case 401: return std::unexpected( error( error_code_t::user_not_found_t ) );
+            case 429: return std::unexpected( error( error_code_t::rate_limited_t ) );
+            case 503: return std::unexpected( error( error_code_t::app_paused_t ) );
             default: return std::unexpected( error( error_code_t::server_error_t ) );
         }
 
-        const auto json = nlohmann::json::parse( result->body, nullptr, false );
+        const auto json = nlohmann::json::parse( response, nullptr, false );
 
         if ( json.is_discarded() )
             return std::unexpected( error( error_code_t::failed_to_parse_body_t ) );
@@ -210,7 +231,6 @@ namespace tsar
     client::client( const std::string_view app_id, const std::string_view client_key, const std::string_view hwid )
         : app_id( app_id ),
           hwid( hwid ),
-          http_client( "https://tsar.cc" ),
           ntp_client( "time.cloudflare.com", 123 )
     {
         if ( const auto k = base64::safe_from_base64( client_key ) )

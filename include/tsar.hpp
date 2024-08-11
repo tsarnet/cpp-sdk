@@ -2,8 +2,6 @@
 
 #pragma once
 
-#include <httplib.h>
-
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -89,7 +87,6 @@ namespace tsar
     class client
     {
         std::string app_id, pub_key, hwid;
-        httplib::Client http_client;
         NTPClient ntp_client;
 
         /// <summary>
