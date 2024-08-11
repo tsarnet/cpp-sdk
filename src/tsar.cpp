@@ -28,6 +28,7 @@ namespace tsar
             case httplib::StatusCode::BadRequest_400: return std::unexpected( error( error_code_t::bad_request_t ) );
             case httplib::StatusCode::NotFound_404: return std::unexpected( error( error_code_t::app_not_found_t ) );
             case httplib::StatusCode::Unauthorized_401: return std::unexpected( error( error_code_t::user_not_found_t ) );
+            case httplib::StatusCode::TooManyRequests_429: return std::unexpected( error( error_code_t::rate_limited_t ) );
             case httplib::StatusCode::ServiceUnavailable_503: return std::unexpected( error( error_code_t::app_paused_t ) );
             default: return std::unexpected( error( error_code_t::server_error_t ) );
         }
