@@ -33,6 +33,7 @@ namespace tsar
             case error_code_t::app_paused_t: return "App was paused by the developer.";
             case error_code_t::user_not_found_t: return "HWID does not match to user.";
             case error_code_t::server_error_t: return "TSAR server did not return OK.";
+            case error_code_t::bad_request_t: return "The request passed to the TSAR server was bad.";
             case error_code_t::failed_to_parse_body_t: return "Failed to parse body into JSON.";
             case error_code_t::failed_to_get_data_t: return "Failed to get data field from JSON.";
             case error_code_t::failed_to_get_signature_t: return "Failed to get signature field from JSON.";
@@ -42,7 +43,7 @@ namespace tsar
             case error_code_t::failed_to_parse_data_t: return "Failed to parse data field into JSON.";
             case error_code_t::failed_to_get_timestamp_t: return "Failed to get timestamp field.";
             case error_code_t::failed_to_parse_timestamp_t: return "Failed to parse timestamp field into uint64_t.";
-            case error_code_t::hwid_mismatch_t: return "Local HWID and HWID returned from server dont match.";
+            case error_code_t::hwid_mismatch_t: return "Local HWID and HWID returned from server don't match.";
             case error_code_t::old_response_t: return "Response is old.";
             case error_code_t::invalid_signature_t: return "Signature is not authentic.";
 

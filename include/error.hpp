@@ -51,6 +51,11 @@ namespace tsar
         server_error_t,
 
         /// <summary>
+        /// The request passed to the TSAR server was bad.
+        /// </summary>
+        bad_request_t,
+
+        /// <summary>
         /// Failed to parse returned body into JSON.
         /// </summary>
         failed_to_parse_body_t,

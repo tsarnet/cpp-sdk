@@ -25,6 +25,7 @@ namespace tsar
             // This is the only status code we care about.
             case httplib::StatusCode::OK_200: break;
 
+            case httplib::StatusCode::BadRequest_400: return std::unexpected( error( error_code_t::bad_request_t ) );
             case httplib::StatusCode::NotFound_404: return std::unexpected( error( error_code_t::app_not_found_t ) );
             case httplib::StatusCode::Unauthorized_401: return std::unexpected( error( error_code_t::user_not_found_t ) );
             case httplib::StatusCode::ServiceUnavailable_503: return std::unexpected( error( error_code_t::app_paused_t ) );
@@ -203,11 +204,7 @@ namespace tsar
         {
             switch ( static_cast< error_code_t >( result.error().code().value() ) )
             {
-                case error_code_t::unauthorized_t:
-                {
-                    // If the user is suddenly unauthorized then we return false because the session is no longer expired.
-                    return false;
-                }
+                case error_code_t::unauthorized_t: return false;
 
                 default: throw result.error();
             }
