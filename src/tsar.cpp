@@ -197,21 +197,14 @@ namespace tsar
         return create( app_id, client_key, std::format( "{}.tsar.app", app_id ) );
     }
 
-    bool client::validate()
+    result_t< validation_data_t > client::validate() noexcept
     {
         const auto result = query( std::format( "validate?app={}&session={}&hwid={}", app_id, session, hwid ) );
 
         if ( !result )
-        {
-            switch ( static_cast< error_code_t >( result.error().code().value() ) )
-            {
-                case error_code_t::unauthorized_t: return false;
+            return std::unexpected( result.error() );
 
-                default: throw result.error();
-            }
-        }
-
-        return true;
+        return ( *result ).template get< validation_data_t >();
     }
 
     client::client( const std::string_view app_id, const std::string_view client_key, const std::string_view hwid )
@@ -252,5 +245,12 @@ namespace tsar
 
         j.at( "user" ).get_to( s.user );
         j.at( "tier" ).get_to( s.tier );
+    }
+
+    void from_json( const nlohmann::json& j, validation_data_t& v )
+    {
+        j.at( "hwid" ).get_to( v.hwid );
+
+        v.timestamp = std::chrono::system_clock::from_time_t( j.at( "timestamp" ).get< uint64_t >() );
     }
 }  // namespace tsar

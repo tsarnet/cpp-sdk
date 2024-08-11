@@ -8,17 +8,24 @@ int main()
 {
     try
     {
-        const auto client = tsar::client::create( app_id, client_key );
+        const auto client = tsar::client::create( app_id, client_key, "test" );
 
         const auto& subscription = client->get_subscription();
 
         std::println( std::cout, "[+] Authentication success, welcome {}!", subscription.user.username.value_or( "N/A" ) );
+        std::println( std::cout, " *  subscription id: {}", subscription.id );
+        std::println( std::cout, " *  subscription expires: {}", subscription.expires.value_or( std::chrono::system_clock::time_point{} ) );
+        std::println( std::cout, " *  user id: {}", subscription.id );
+        std::println( std::cout, " *  username: {}", subscription.user.username.value_or( "N/A" ) );
+        std::println( std::cout, " *  avatar: {}", subscription.user.avatar.value_or( "N/A" ) );
 
-        while ( client->validate() )
+        while ( const auto result = client->validate() )
         {
-            std::println( std::cout, "[+] Heartbeat success" );
+            std::println( std::cout, "[+] Heartbeat success:" );
+            std::println( std::cout, " *  hwid: {}", result.value().hwid );
+            std::println( std::cout, " *  timestamp: {}", result.value().timestamp );
 
-            std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+            std::this_thread::sleep_for( std::chrono::seconds( 5 ) );
         }
 
         std::println( std::cout, "[-] Heartbeat failed. Session has expired." );

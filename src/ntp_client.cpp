@@ -40,11 +40,6 @@ void NTPClient::build_connection()
     if ( ntp_server_ip.empty() )
         return;
 
-    //timeval timeout_time_value{};
-    //timeout_time_value.tv_sec = 30;  // timeout in seconds
-    //setsockopt( socket_fd, SOL_SOCKET, SO_SNDTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
-    //setsockopt( socket_fd, SOL_SOCKET, SO_RCVTIMEO, reinterpret_cast< const char * >( &timeout_time_value ), sizeof( timeout_time_value ) );
-
     // Filling server information
     socket_client.sin_family = AF_INET;
     socket_client.sin_port = htons( port_ );
@@ -121,7 +116,6 @@ std::string NTPClient::hostname_to_ip( const std::string &host )
     int status = getaddrinfo( host.c_str(), nullptr, &hints, &res );
     if ( status != 0 )
     {
-        std::cerr << "Error resolving hostname: " << gai_strerror( status ) << std::endl;
         return {};
     }
 

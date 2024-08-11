@@ -56,6 +56,11 @@ namespace tsar
         bad_request_t,
 
         /// <summary>
+        /// The current user has been rate limited.
+        /// </summary>
+        rate_limited_t,
+
+        /// <summary>
         /// Failed to parse returned body into JSON.
         /// </summary>
         failed_to_parse_body_t,

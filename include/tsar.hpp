@@ -68,6 +68,22 @@ namespace tsar
     };
 
     /// <summary>
+    /// The validation data for the TSAR API.
+    /// </summary>
+    struct validation_data_t
+    {
+        /// <summary>
+        /// The hardware ID of the current user.
+        /// </summary>
+        std::string hwid;
+
+        /// <summary>
+        /// The current timestamp.
+        /// </summary>
+        std::chrono::system_clock::time_point timestamp;
+    };
+
+    /// <summary>
     /// The TSAR client class. This class interacts with the API after it has been initialized.
     /// </summary>
     class client
@@ -121,8 +137,10 @@ namespace tsar
 
         /// <summary>
         /// Validates the current session. Returns true if the session is valid.
+        /// 
+        /// Note: This function does not throw exceptions. It will return an error if the session is invalid.
         /// </summary>
-        bool validate();
+        result_t< validation_data_t > validate() noexcept;
 
         /// <summary>
         /// Gets the current subscription for the client.
@@ -135,5 +153,6 @@ namespace tsar
 
     void from_json( const nlohmann::json& j, user_t& u );
     void from_json( const nlohmann::json& j, subscription_t& s );
+    void from_json( const nlohmann::json& j, validation_data_t& v );
 
 }  // namespace tsar
