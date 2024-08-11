@@ -1,8 +1,8 @@
 include(FetchContent)
 
 # Ensure that static libraries are used
-# set (OPENSSL_USE_STATIC_LIBS FALSE)
-# set (CURL_USE_STATIC_LIBS FALSE)
+set (OPENSSL_USE_STATIC_LIBS TRUE)
+set (CURL_USE_STATIC_LIBS TRUE)
 
 # Find the required packages
 find_package (OpenSSL REQUIRED)
@@ -38,8 +38,8 @@ target_include_directories(tsar_core SYSTEM INTERFACE
 
 add_library (tsar STATIC)
 target_link_libraries (tsar PUBLIC tsar_core)
-target_link_libraries (tsar PUBLIC OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries (tsar PUBLIC CURL::libcurl)
+target_link_libraries (tsar PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries (tsar PRIVATE CURL::libcurl)
 target_link_libraries (tsar PUBLIC nlohmann_json::nlohmann_json)
 
 

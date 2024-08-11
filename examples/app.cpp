@@ -3,6 +3,8 @@
 #include <iostream>
 #include <thread>
 
+#undef max
+
 constexpr auto app_id = "f911842b-5b3d-4c59-b5d1-4adb8f71557b";
 constexpr auto client_key =
     "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvJrwPvdeDUcV8Qr02tzgFrp+8qfCV/vG1HcQJYYV8u5vYUfGABMAYT0qOQltXEX9DTcB2fzLfwQnl7yiAaNruQ==";
@@ -17,7 +19,7 @@ int main()
 
         std::println( std::cout, "[+] Authentication success, welcome {}!", subscription.user.username.value_or( "N/A" ) );
         std::println( std::cout, " *  subscription id: {}", subscription.id );
-        std::println( std::cout, " *  subscription expires: {}", subscription.expires.value_or( std::chrono::system_clock::time_point{} ) );
+        std::println( std::cout, " *  subscription expires: {}", subscription.expires.value_or( std::chrono::system_clock::time_point::max() ) );
         std::println( std::cout, " *  user id: {}", subscription.id );
         std::println( std::cout, " *  username: {}", subscription.user.username.value_or( "N/A" ) );
         std::println( std::cout, " *  avatar: {}", subscription.user.avatar.value_or( "N/A" ) );
