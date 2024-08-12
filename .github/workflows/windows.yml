@@ -26,7 +26,7 @@ jobs:
         run: cmake . -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=OFF
 
       - name: Package source code
-        run: cmake --build . --target ALL_BUILD
+        run: cmake --build . --target ALL_BUILD --config Release
 
       - name: Create windows directory
         run: cmake -E make_directory windows
@@ -40,3 +40,9 @@ jobs:
       - name: Create zip archive
         run: cmake -E tar cfz windows.zip --format=zip windows
 
+      - name: Add packaged code to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: windows.zip
+          tag: ${{ github.ref }}
