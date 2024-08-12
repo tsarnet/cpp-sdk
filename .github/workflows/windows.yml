@@ -1,0 +1,31 @@
+name: Windows Release
+permissions:
+  contents: write
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configure
+        run: cmake . -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=OFF
+
+      - name: Build the library
+        run: cmake --build . --target ALL_BUILD
+
+      - name: Create windows directory
+        run: cmake -E make_directory windows
+
+      - name: Copy include directory
+        run: cmake -E copy_directory include windows/include
+
+      - name: Copy .lib file
+        run: cmake -E copy lib/Release/tsar.lib windows/tsar.lib
+
+      - name: Create zip archive
+        run: cmake -E tar cfz windows.zip --format=zip windows
