@@ -38,7 +38,7 @@ jobs:
         run: cmake -E copy lib/Release/tsar.lib windows/tsar.lib
 
       - name: Create zip archive
-        run: cmake -E tar cfz windows.zip --format=zip windows
+        run: cmake -E tar cf windows.zip --format=zip windows
 
       - name: Add packaged code to release
         uses: svenstaro/upload-release-action@v2
