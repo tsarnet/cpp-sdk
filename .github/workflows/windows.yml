@@ -17,11 +17,12 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
 
-      - name: Install cURL via vcpkg
+      - name: Install cURL and OpenSSL via vcpkg
         run: |
           .\vcpkg\vcpkg install curl
+          .\vcpkg\vcpkg install openssl
           .\vcpkg\vcpkg integrate install
-          
+
       - name: Configure
         run: cmake . -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake -D CMAKE_BUILD_TYPE=Release -D BUILD_EXAMPLES=OFF
 
@@ -34,8 +35,20 @@ jobs:
       - name: Copy include directory
         run: cmake -E copy_directory include windows/include
 
-      - name: Copy .lib file
+      - name: Copy tsar.lib file
         run: cmake -E copy lib/Release/tsar.lib windows/tsar.lib
+
+      - name: Copy cURL and OpenSSL headers and lib files
+        run: |
+          cmake -E copy_directory .\vcpkg\installed\x64-windows\include windows/include/vcpkg_deps
+          cmake -E copy_directory .\vcpkg\installed\x64-windows\lib windows/lib
+          cmake -E copy_directory .\vcpkg\installed\x64-windows\bin windows/bin
+
+      - name: Copy DLLs if applicable
+        run: |
+          if exist .\vcpkg\installed\x64-windows\bin\*.dll (
+            cmake -E copy_directory .\vcpkg\installed\x64-windows\bin windows/bin
+          )
 
       - name: Create zip archive
         run: cmake -E tar cf windows.zip --format=zip windows
