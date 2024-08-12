@@ -7,6 +7,7 @@
 #ifdef _WIN32
 #include <WinSock2.h>
 #include <Ws2tcpip.h>  // For getaddrinfo and inet_ntop
+#pragma comment( lib, "Ws2_32.lib" )
 #define close( X ) closesocket( X )
 #else
 #include <arpa/inet.h>

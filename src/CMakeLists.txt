@@ -1,11 +1,12 @@
 include(FetchContent)
 
-# Find the OpenSSL package
-find_package(OpenSSL REQUIRED)
+# Ensure that static libraries are used
+set (OPENSSL_USE_STATIC_LIBS TRUE)
+set (CURL_USE_STATIC_LIBS TRUE)
 
-# Fetch and include the http library
-FetchContent_Declare (httplib GIT_REPOSITORY https://github.com/yhirose/cpp-httplib)
-FetchContent_MakeAvailable (httplib)
+# Find the required packages
+find_package (OpenSSL REQUIRED)
+find_package (CURL REQUIRED)
 
 # Fetch and include the json library
 FetchContent_Declare (json 
@@ -37,9 +38,10 @@ target_include_directories(tsar_core SYSTEM INTERFACE
 
 add_library (tsar STATIC)
 target_link_libraries (tsar PUBLIC tsar_core)
-target_link_libraries (tsar PUBLIC OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries (tsar PUBLIC httplib::httplib)
+target_link_libraries (tsar PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries (tsar PRIVATE CURL::libcurl)
 target_link_libraries (tsar PUBLIC nlohmann_json::nlohmann_json)
+
 
 # Add the source files to the project
 target_sources (tsar PRIVATE
@@ -50,4 +52,4 @@ target_sources (tsar PRIVATE
 )
 
 # Add the include directories
-target_include_directories (tsar PRIVATE ${include_dir})
+target_include_directories (tsar PRIVATE ${include_dir} ${OPENSSL_INCLUDE_DIR})

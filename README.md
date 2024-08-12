@@ -4,6 +4,7 @@
 > The lastest build of the C++ SDK will only compile if building a Windows application. We are currently working on supporting other systems like Unix/Linux and MacOS.
 
 * [Installation](#installation)
+    * [Static Libraries](#static-libraries)
 * [Usage](#usage)
 * [Contributing](#contributing)
 * [Need help?](#need-help)
@@ -22,7 +23,16 @@ FetchContent_MakeAvailable (tsar)
 # Link the SDK into your project
 target_link_libraries(your_project PRIVATE tsar)
 ```
-This library requires [OpenSSL](https://www.openssl.org/), a package that should already be installed on your system. If you get a build error regarding OpenSSL, you can install it via a package manager like [vcpkg](https://vcpkg.io/) or [conan](https://conan.io/).
+This library requires [OpenSSL](https://www.openssl.org/) and [cURL](https://curl.se/), packages that should already be installed on your system. If you get a build error you can install them via [vcpkg](https://vcpkg.io/) like so:
+```
+vcpkg install openssl curl
+```
+Then run the following command in the project's root directory to set up the CMake project. Remember to replace `<path-to-vcpkg>` with the path to vcpkg. This depends on where you have installed it.
+```
+cmake . -D CMAKE_TOOLCHAIN_FILE=C:\<path-to-vcpkg>\scripts\buildsystems\vcpkg.cmake
+```
+### Static Libraries
+If you are not a CMake user, you will have to manually link the SDK to your project.
 
 ## Usage
 We've designed this library to be lightweight and easy to use. Feel free to take a peek at any of our [examples](/examples), all of them are pretty straightforward. A simple usage example has been attached below:
