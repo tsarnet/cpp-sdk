@@ -12,11 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libcurl4-openssl-dev
+
       - name: Create build environment
         run: cmake -E make_directory build
+
       - name: Configure
         working-directory: build/
         run: cmake $GITHUB_WORKSPACE
+
       - name: Package source code
         working-directory: build/
         run: cmake --build . --target tsar_package
