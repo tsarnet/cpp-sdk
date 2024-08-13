@@ -37,7 +37,7 @@ jobs:
         run: cmake -E copy_directory include windows-x64/include
 
       - name: Copy tsar.lib file
-        run: cmake -E copy lib/Release/tsar.lib windows-x64/tsar.lib
+        run: cmake -E copy lib/Release/tsar.lib windows-x64/lib/tsar.lib
 
       - name: Copy vcpkg package headers and lib files
         run: |
