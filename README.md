@@ -17,7 +17,7 @@ If you are using CMake, simply add the following lines to your `CMakeLists.txt` 
 include (FetchContent) # if you don't have this already
 
 # Fetch the latest version of the SDK
-FetchContent_Declare (tsar URL https://github.com/tsarnet/cpp-sdk/releases/download/v1.0/tsar-src.zip)
+FetchContent_Declare (tsar URL https://github.com/tsarnet/cpp-sdk/releases/latest/download/tsar-src.zip)
 FetchContent_MakeAvailable (tsar)
 
 # Link the SDK into your project
