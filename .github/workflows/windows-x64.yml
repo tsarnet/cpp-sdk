@@ -24,7 +24,13 @@ jobs:
           .\vcpkg\vcpkg integrate install
 
       - name: Configure
-        run: cmake . -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake -D BUILD_EXAMPLES=OFF
+        run: |
+          cmake -DCMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+                -DVCPKG_TARGET_TRIPLET=x64-windows-static ^
+                -DOPENSSL_USE_STATIC_LIBS=TRUE ^
+                -DOPENSSL_ROOT_DIR=.\vcpkg\installed\x64-windows-static ^
+                -DCURL_USE_STATIC_LIBS=TRUE ^
+                -D BUILD_EXAMPLES=OFF .
 
       - name: Package source code
         run: cmake --build . --target ALL_BUILD --config Release
