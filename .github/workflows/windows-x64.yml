@@ -19,8 +19,8 @@ jobs:
 
       - name: Install cURL and OpenSSL via vcpkg
         run: |
-          .\vcpkg\vcpkg --triplet x64-windows-static install curl
           .\vcpkg\vcpkg --triplet x64-windows-static install openssl
+          .\vcpkg\vcpkg --triplet x64-windows-static install curl
           .\vcpkg\vcpkg integrate install
 
       - name: Configure
