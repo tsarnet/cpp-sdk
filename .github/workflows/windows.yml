@@ -48,7 +48,8 @@ jobs:
         run: |
           $includeDirs = Get-ChildItem -Path _deps -Recurse -Directory -Filter "include"
           foreach ($dir in $includeDirs) {
-              cmake -E copy_directory $dir.FullName windows/include
+              $dir.FullName
+              cmake -E copy_directory $dir.FullName windows/include/_deps
           }
         shell: pwsh
 
