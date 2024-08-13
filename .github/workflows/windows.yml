@@ -1,4 +1,4 @@
-name: Windows Release (x64)
+name: Windows Static Package
 permissions:
   contents: write
 
@@ -7,7 +7,7 @@ on:
     types: [published]
 
 jobs:
-  release:
+  build-x64:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -25,11 +25,11 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -DCMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake ^
-                -DVCPKG_TARGET_TRIPLET=x64-windows-static ^
-                -DOPENSSL_USE_STATIC_LIBS=TRUE ^
-                -DOPENSSL_ROOT_DIR=.\vcpkg\installed\x64-windows-static ^
-                -DCURL_USE_STATIC_LIBS=TRUE ^
+          cmake -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+                -D VCPKG_TARGET_TRIPLET=x64-windows-static ^
+                -D OPENSSL_USE_STATIC_LIBS=TRUE ^
+                -D OPENSSL_ROOT_DIR=.\vcpkg\installed\x64-windows-static ^
+                -D CURL_USE_STATIC_LIBS=TRUE ^
                 -D BUILD_EXAMPLES=OFF .
 
       - name: Package source code
