@@ -25,12 +25,7 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake ^
-                -D VCPKG_TARGET_TRIPLET=x64-windows-static ^
-                -D OPENSSL_USE_STATIC_LIBS=TRUE ^
-                -D OPENSSL_ROOT_DIR=.\vcpkg\installed\x64-windows-static ^
-                -D CURL_USE_STATIC_LIBS=TRUE ^
-                -D BUILD_EXAMPLES=OFF .
+          cmake -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake -D VCPKG_TARGET_TRIPLET=x64-windows-static -D OPENSSL_USE_STATIC_LIBS=TRUE -D OPENSSL_ROOT_DIR=.\vcpkg\installed\x64-windows-static -D CURL_USE_STATIC_LIBS=TRUE -D BUILD_EXAMPLES=OFF .
 
       - name: Package source code
         run: cmake --build . --target ALL_BUILD --config Release
