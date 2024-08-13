@@ -1,0 +1,62 @@
+name: Windows Release (x64)
+permissions:
+  contents: write
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+
+      - name: Install cURL and OpenSSL via vcpkg
+        run: |
+          .\vcpkg\vcpkg --triplet x64-windows-static install curl
+          .\vcpkg\vcpkg --triplet x64-windows-static install openssl
+          .\vcpkg\vcpkg integrate install
+
+      - name: Configure
+        run: cmake . -D CMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake -D BUILD_EXAMPLES=OFF
+
+      - name: Package source code
+        run: cmake --build . --target ALL_BUILD --config Release
+
+      - name: Create windows directory
+        run: cmake -E make_directory windows-x64
+
+      - name: Copy include directory
+        run: cmake -E copy_directory include windows-x64/include
+
+      - name: Copy tsar.lib file
+        run: cmake -E copy lib/Release/tsar.lib windows-x64/tsar.lib
+
+      - name: Copy vcpkg package headers and lib files
+        run: |
+          cmake -E copy_directory .\vcpkg\installed\x64-windows-static\include windows-x64/include/_deps
+          cmake -E copy_directory .\vcpkg\installed\x64-windows-static\lib windows-x64/lib
+
+      - name: Copy FetchContent include directories
+        run: |
+          $includeDirs = Get-ChildItem -Path _deps -Recurse -Directory -Filter "include"
+          foreach ($dir in $includeDirs) {
+              cmake -E copy_directory $dir.FullName windows/include
+          }
+        shell: pwsh
+
+      - name: Create zip archive
+        run: cmake -E tar cf windows-x64.zip --format=zip windows-x64
+
+      - name: Add packaged code to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: windows-x64.zip
+          tag: ${{ github.ref }}
