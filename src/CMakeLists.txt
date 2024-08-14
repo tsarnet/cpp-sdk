@@ -22,7 +22,9 @@ set (header_files
 	"${include_dir}/tsar.hpp"
 	"${include_dir}/error.hpp"
 	"${include_dir}/system.hpp"
-	"${include_dir}/ntp_client.hpp")
+	"${include_dir}/ntp/client.hpp"
+	"${include_dir}/ntp/error.hpp"
+)
 
 # Add the library to the project
 add_library (tsar_core INTERFACE)
@@ -48,7 +50,8 @@ target_sources (tsar PRIVATE
 	"tsar.cpp"
 	"error.cpp"
 	"system.cpp"
-	"ntp_client.cpp"
+	"ntp/client.cpp"
+	"ntp/error.cpp"
 )
 
 # Add the include directories

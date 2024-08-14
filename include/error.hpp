@@ -3,6 +3,8 @@
 #include <expected>
 #include <system_error>
 
+#include "ntp/error.hpp"
+
 namespace tsar
 {
     /// <summary>
@@ -10,6 +12,16 @@ namespace tsar
     /// </summary>
     enum class error_code_t
     {
+        /// <summary>
+        /// The App ID provided is not in the right format. Must be in UUID (00000000-0000-0000-0000-000000000000) format.
+        /// </summary>
+        invalid_app_id_t,
+
+        /// <summary>
+        /// The Client Key provided is not in the right format. Must be in Base64 (MFk...qA==) format.
+        /// </summary>
+        invalid_client_key_t,
+
         /// <summary>
         /// Failed to get the user's HWID.
         /// </summary>
@@ -165,6 +177,18 @@ namespace tsar
         /// </summary>
         /// <param name="code">The error code value.</param>
         explicit error( error_code_t code ) noexcept;
+
+        /// <summary>
+        /// Creates a new error with the specified error code value.
+        /// </summary>
+        /// <param name="code">The error code value.</param>
+        explicit error( ntp::error_code_t code ) noexcept;
     };
+
+    /// <summary>
+    /// The result type for the TSAR API.
+    /// </summary>
+    template< typename T >
+    using result_t = std::expected< T, error >;
 
 }  // namespace tsar

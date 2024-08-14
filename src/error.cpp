@@ -10,6 +10,10 @@ namespace tsar
     {
     }
 
+    error::error( ntp::error_code_t code ) noexcept : error( { static_cast< std::int32_t >( code ), ntp::error_category::get() } )
+    {
+    }
+
     const error_category& error_category::get() noexcept
     {
         static error_category instance;
@@ -25,6 +29,8 @@ namespace tsar
     {
         switch ( static_cast< error_code_t >( ev ) )
         {
+            case error_code_t::invalid_app_id_t: return "Invalid App ID format. Must be in UUID format.";
+            case error_code_t::invalid_client_key_t: return "Invalid Client Key format. Must be in Base64 format.";
             case error_code_t::failed_to_get_hwid_t: return "Failed to get the user's HWID.";
             case error_code_t::failed_to_open_browser_t: return "Failed to open browser.";
             case error_code_t::unauthorized_t: return "User is not authorized to use the application.";
