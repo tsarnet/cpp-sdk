@@ -14,6 +14,16 @@ namespace tsar
     {
     }
 
+    bool error::operator==( const error_code_t& c ) const noexcept
+    {
+        return strcmp( code().category().name(), "tsar" ) == 0 && code().value() == static_cast< int >( c );
+    }
+
+    bool error::operator!=( const error_code_t& c ) const noexcept
+    {
+        return !( *this == c );
+    }
+
     const error_category& error_category::get() noexcept
     {
         static error_category instance;
@@ -33,11 +43,10 @@ namespace tsar
             case error_code_t::invalid_client_key_t: return "Invalid Client Key format. Must be in Base64 format.";
             case error_code_t::failed_to_get_hwid_t: return "Failed to get the user's HWID.";
             case error_code_t::failed_to_open_browser_t: return "Failed to open browser.";
-            case error_code_t::unauthorized_t: return "User is not authorized to use the application.";
             case error_code_t::request_failed_t: return "Request to TSAR server failed.";
             case error_code_t::app_not_found_t: return "App ID not found.";
             case error_code_t::app_paused_t: return "App was paused by the developer.";
-            case error_code_t::user_not_found_t: return "HWID does not match to user.";
+            case error_code_t::unauthorized_t: return "Your HWID is not authorized.";
             case error_code_t::server_error_t: return "TSAR server did not return OK.";
             case error_code_t::bad_request_t: return "The request passed to the TSAR server was bad.";
             case error_code_t::rate_limited_t: return "User has been rate limited.";

@@ -33,11 +33,6 @@ namespace tsar
         failed_to_open_browser_t,
 
         /// <summary>
-        /// User is not authorized to use the application.
-        /// </summary>
-        unauthorized_t,
-
-        /// <summary>
         /// Request to the TSAR server failed, server may be down.
         /// </summary>
         request_failed_t,
@@ -53,9 +48,10 @@ namespace tsar
         app_paused_t,
 
         /// <summary>
-        /// The HWID passed does not match to a user.
+        /// The TSAR API returned a 401: Unauthorized status code.
+        /// This means that the user's HWID did not match to a subscription object.
         /// </summary>
-        user_not_found_t,
+        unauthorized_t,
 
         /// <summary>
         /// TSAR server had an error and did not return an OK status.
@@ -183,6 +179,16 @@ namespace tsar
         /// </summary>
         /// <param name="code">The error code value.</param>
         explicit error( ntp::error_code_t code ) noexcept;
+
+        /// <summary>
+        /// Checks if the error code is equal to the specified code.
+        /// </summary>
+        bool operator==( const error_code_t& c ) const noexcept;
+
+        /// <summary>
+        /// Checks if the error code is not equal to the specified code.
+        /// </summary>
+        bool operator!=( const error_code_t& c ) const noexcept;
     };
 
     /// <summary>

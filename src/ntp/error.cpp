@@ -26,7 +26,10 @@ namespace tsar::ntp
     {
         switch ( static_cast< error_code_t >( ev ) )
         {
-            case error_code_t::failed_to_build_connection_t: return "The NTP client failed to build a connection to the server.";
+            case error_code_t::failed_to_build_connection_t: return "Failed to build a connection to the server.";
+            case error_code_t::failed_to_resolve_hostname_t: return "Failed to resolve the hostname.";
+            case error_code_t::failed_to_send_packet_t: return "Failed to send a packet to the server.";
+            case error_code_t::failed_to_receive_packet_t: return "Failed to receive a packet from the server.";
             default: return "An unknown error occurred.";
         }
     }

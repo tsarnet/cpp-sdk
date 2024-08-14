@@ -62,8 +62,6 @@ namespace tsar::ntp
 
     result_t< time_t > client::request_time()
     {
-        int response;  // return result from writing/reading from the socket
-
         const auto result = build_connection();
 
         if ( !result )

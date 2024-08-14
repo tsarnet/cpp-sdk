@@ -62,7 +62,7 @@ namespace tsar
 
             case 400: return std::unexpected( error( error_code_t::bad_request_t ) );
             case 404: return std::unexpected( error( error_code_t::app_not_found_t ) );
-            case 401: return std::unexpected( error( error_code_t::user_not_found_t ) );
+            case 401: return std::unexpected( error( error_code_t::unauthorized_t ) );
             case 429: return std::unexpected( error( error_code_t::rate_limited_t ) );
             case 503: return std::unexpected( error( error_code_t::app_paused_t ) );
             default: return std::unexpected( error( error_code_t::server_error_t ) );
@@ -195,7 +195,7 @@ namespace tsar
         return result == 1;
     }
 
-    result_t< std::unique_ptr< client > > client::create( const std::string_view app_id, const std::string_view client_key ) noexcept
+    result_t< client > client::create( const std::string_view app_id, const std::string_view client_key ) noexcept
     {
         if ( app_id.length() != app_id_size )
             return std::unexpected( error( error_code_t::invalid_app_id_t ) );
@@ -210,7 +210,7 @@ namespace tsar
             return std::unexpected( error( error_code_t::failed_to_decode_public_key_t ) );
 
         // Make the initialization request to the server.
-        const auto result = client::query( *decoded, std::format( "initialize?app_id={}", app_id ) );
+        const auto result = query( *decoded, std::format( "initialize?app_id={}", app_id ) );
 
         if ( !result )
             return std::unexpected( result.error() );
@@ -218,7 +218,33 @@ namespace tsar
         // Set the dashboard hostname and exit
         const auto hostname = ( *result )[ "dashboard_hostname" ].template get< std::string >();
 
-        return std::unique_ptr< client >( new client( app_id, *decoded, hostname ) );
+        return client( app_id, *decoded, hostname );
+    }
+
+    result_t< user > client::authenticate( bool open ) const noexcept
+    {
+        // Make the authentication request to the server.
+        const auto result = query< user >( pub_key, std::format( "authenticate?app_id={}", app_id ) );
+
+        if ( !result )
+        {
+            if ( result.error() == error_code_t::unauthorized_t && open )
+            {
+                // Try and get the HWID associated with the user's system.
+                const auto hwid = system::hwid();
+
+                if ( !hwid )
+                    return std::unexpected( error( error_code_t::failed_to_get_hwid_t ) );
+
+                // Open the user's default browser to prompt a login.
+                if ( !system::open_browser( std::format( "https://{}/auth/{}", hostname, *hwid ) ) )
+                    return std::unexpected( error( error_code_t::failed_to_open_browser_t ) );
+            }
+
+            return std::unexpected( result.error() );
+        }
+
+        return *result;
     }
 
     client::client( const std::string_view app_id, const std::string_view pub_key, const std::string_view hostname )
