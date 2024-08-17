@@ -56,6 +56,7 @@ namespace tsar
             case error_code_t::failed_to_decode_data_t: return "Failed to decode data field from parsed JSON body.";
             case error_code_t::failed_to_decode_signature_t: return "Failed to decode signature field from parsed JSON body.";
             case error_code_t::failed_to_decode_public_key_t: return "Failed to decode client key from base64.";
+            case error_code_t::failed_to_decode_session_key_t: return "Failed to decode session key from base64.";
             case error_code_t::failed_to_parse_data_t: return "Failed to parse data field into JSON.";
             case error_code_t::failed_to_get_timestamp_t: return "Failed to get timestamp field.";
             case error_code_t::failed_to_parse_timestamp_t: return "Failed to parse timestamp field into uint64_t.";

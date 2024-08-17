@@ -4,20 +4,20 @@
 #include <string>
 
 #include "ntp/client.hpp"
-#include "user.hpp"
+
+#include <nlohmann/json.hpp>
 
 namespace tsar
 {
-    struct validate_result_t
-	{
-		st
-	};
+    class user;
 
     /// <summary>
     /// The TSAR client class. This class interacts with the API after it has been initialized.
     /// </summary>
     class client final
     {
+        friend class user;
+
         /// <summary>
         /// The URL of the TSAR API.
         /// </summary>
@@ -38,10 +38,10 @@ namespace tsar
         /// <summary>
         /// Queries the TSAR API with the specified endpoint.
         /// </summary>
-        static result_t< nlohmann::json > query( const std::string_view key, const std::string_view endpoint ) noexcept;
+        static result_t< nlohmann::json > api_call( const std::string_view key, const std::string_view endpoint ) noexcept;
 
         template< typename T >
-        static result_t< T > query( const std::string_view key, const std::string_view endpoint ) noexcept;
+        static result_t< T > api_call( const std::string_view key, const std::string_view endpoint ) noexcept;
 
         /// <summary>
         /// Verifies the signature of the JSON data using the ECDSA algorithm.
@@ -66,9 +66,9 @@ namespace tsar
     };
 
     template< typename T >
-    inline result_t< T > client::query( const std::string_view key, const std::string_view endpoint ) noexcept
+    inline result_t< T > client::api_call( const std::string_view key, const std::string_view endpoint ) noexcept
     {
-        const auto result = query( key, endpoint );
+        const auto result = api_call( key, endpoint );
 
         if ( result )
         {
@@ -86,3 +86,5 @@ namespace tsar
     }
 
 }  // namespace tsar
+
+#include "user.hpp"

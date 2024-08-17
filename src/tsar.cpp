@@ -22,7 +22,7 @@ namespace tsar
         return size * nmemb;
     }
 
-    result_t< nlohmann::json > client::query( const std::string_view key, const std::string_view endpoint ) noexcept
+    result_t< nlohmann::json > client::api_call( const std::string_view key, const std::string_view endpoint ) noexcept
     {
         const auto hwid = system::hwid();
 
@@ -122,7 +122,10 @@ namespace tsar
         if ( !verify_signature( key, *data, *signature ) )
             return std::unexpected( error( error_code_t::invalid_signature_t ) );
 
-        return data_json[ "data" ];
+        if ( data_json.contains( "data" ) )
+            return data_json[ "data" ];
+
+        return data_json;
     }
 
     bool client::verify_signature( const std::string_view key, const std::string_view json, const std::string_view signature ) noexcept
@@ -210,7 +213,7 @@ namespace tsar
             return std::unexpected( error( error_code_t::failed_to_decode_public_key_t ) );
 
         // Make the initialization request to the server.
-        const auto result = query( *decoded, std::format( "initialize?app_id={}", app_id ) );
+        const auto result = api_call( *decoded, std::format( "initialize?app_id={}", app_id ) );
 
         if ( !result )
             return std::unexpected( result.error() );
@@ -224,7 +227,7 @@ namespace tsar
     result_t< user > client::authenticate( bool open ) const noexcept
     {
         // Make the authentication request to the server.
-        const auto result = query< user >( pub_key, std::format( "authenticate?app_id={}", app_id ) );
+        const auto result = api_call< user >( pub_key, std::format( "authenticate?app_id={}", app_id ) );
 
         if ( !result )
         {

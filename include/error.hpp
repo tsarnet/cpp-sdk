@@ -99,6 +99,11 @@ namespace tsar
         failed_to_decode_public_key_t,
 
         /// <summary>
+        /// Failed to decode the session key from base64.
+        /// </summary>
+        failed_to_decode_session_key_t,
+
+        /// <summary>
         /// Failed to parse the `data` field into JSON.
         /// </summary>
         failed_to_parse_data_t,
