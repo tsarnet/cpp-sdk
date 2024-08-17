@@ -20,9 +20,12 @@ cmake_path (SET include_dir "${CMAKE_CURRENT_SOURCE_DIR}/../include")
 set (header_files 
 	"${include_dir}/base64.hpp"
 	"${include_dir}/tsar.hpp"
+	"${include_dir}/user.hpp"
 	"${include_dir}/error.hpp"
 	"${include_dir}/system.hpp"
-	"${include_dir}/ntp_client.hpp")
+	"${include_dir}/ntp/client.hpp"
+	"${include_dir}/ntp/error.hpp"
+)
 
 # Add the library to the project
 add_library (tsar_core INTERFACE)
@@ -46,9 +49,11 @@ target_link_libraries (tsar PUBLIC nlohmann_json::nlohmann_json)
 # Add the source files to the project
 target_sources (tsar PRIVATE
 	"tsar.cpp"
+	"user.cpp"
 	"error.cpp"
 	"system.cpp"
-	"ntp_client.cpp"
+	"ntp/client.cpp"
+	"ntp/error.cpp"
 )
 
 # Add the include directories

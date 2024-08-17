@@ -3,6 +3,8 @@
 #include <expected>
 #include <system_error>
 
+#include "ntp/error.hpp"
+
 namespace tsar
 {
     /// <summary>
@@ -10,6 +12,16 @@ namespace tsar
     /// </summary>
     enum class error_code_t
     {
+        /// <summary>
+        /// The App ID provided is not in the right format. Must be in UUID (00000000-0000-0000-0000-000000000000) format.
+        /// </summary>
+        invalid_app_id_t,
+
+        /// <summary>
+        /// The Client Key provided is not in the right format. Must be in Base64 (MFk...qA==) format.
+        /// </summary>
+        invalid_client_key_t,
+
         /// <summary>
         /// Failed to get the user's HWID.
         /// </summary>
@@ -19,11 +31,6 @@ namespace tsar
         /// Failed to open the user's default browser.
         /// </summary>
         failed_to_open_browser_t,
-
-        /// <summary>
-        /// User is not authorized to use the application.
-        /// </summary>
-        unauthorized_t,
 
         /// <summary>
         /// Request to the TSAR server failed, server may be down.
@@ -41,9 +48,10 @@ namespace tsar
         app_paused_t,
 
         /// <summary>
-        /// The HWID passed does not match to a user.
+        /// The TSAR API returned a 401: Unauthorized status code.
+        /// This means that the user's HWID did not match to a subscription object.
         /// </summary>
-        user_not_found_t,
+        unauthorized_t,
 
         /// <summary>
         /// TSAR server had an error and did not return an OK status.
@@ -89,6 +97,11 @@ namespace tsar
         /// Failed to decode the client key from base64.
         /// </summary>
         failed_to_decode_public_key_t,
+
+        /// <summary>
+        /// Failed to decode the session key from base64.
+        /// </summary>
+        failed_to_decode_session_key_t,
 
         /// <summary>
         /// Failed to parse the `data` field into JSON.
@@ -165,6 +178,28 @@ namespace tsar
         /// </summary>
         /// <param name="code">The error code value.</param>
         explicit error( error_code_t code ) noexcept;
+
+        /// <summary>
+        /// Creates a new error with the specified error code value.
+        /// </summary>
+        /// <param name="code">The error code value.</param>
+        explicit error( ntp::error_code_t code ) noexcept;
+
+        /// <summary>
+        /// Checks if the error code is equal to the specified code.
+        /// </summary>
+        bool operator==( const error_code_t& c ) const noexcept;
+
+        /// <summary>
+        /// Checks if the error code is not equal to the specified code.
+        /// </summary>
+        bool operator!=( const error_code_t& c ) const noexcept;
     };
+
+    /// <summary>
+    /// The result type for the TSAR API.
+    /// </summary>
+    template< typename T >
+    using result_t = std::expected< T, error >;
 
 }  // namespace tsar

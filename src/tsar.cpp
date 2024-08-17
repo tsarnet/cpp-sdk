@@ -4,28 +4,42 @@
 #include <openssl/x509.h>
 
 #include <format>
-#include <print>
+#include <iostream>
 
 #include "base64.hpp"
-#include "ntp_client.hpp"
 #include "system.hpp"
+
+constexpr auto app_id_size = 36;
+constexpr auto client_key_size = 124;
 
 namespace tsar
 {
+    ntp::client client::ntp{ "time.cloudflare.com", 123 };
+
     static size_t write_callback( void* ptr, size_t size, size_t nmemb, std::string* data )
     {
         data->append( ( char* )ptr, size * nmemb );
         return size * nmemb;
     }
 
-    result_t< nlohmann::json > client::query( const std::string_view endpoint ) noexcept
+    result_t< nlohmann::json > client::api_call( const std::string_view key, const std::string_view endpoint ) noexcept
     {
+        const auto hwid = system::hwid();
+
+        if ( !hwid )
+            return std::unexpected( error( error_code_t::failed_to_get_hwid_t ) );
+
         const auto curl = curl_easy_init();
 
         if ( !curl )
             return std::unexpected( error( error_code_t::unexpected_error_t ) );
 
-        curl_easy_setopt( curl, CURLOPT_URL, std::format( "https://tsar.cc/api/client/{}", endpoint ).c_str() );
+        auto formatted = std::format( "{}/{}", api_url, endpoint );
+
+        // Add the HWID to the endpoint.
+        formatted.append( std::format( "&hwid={}", *hwid ) );
+
+        curl_easy_setopt( curl, CURLOPT_URL, formatted.c_str() );
 
         std::string response;
         curl_easy_setopt( curl, CURLOPT_WRITEFUNCTION, write_callback );
@@ -48,7 +62,7 @@ namespace tsar
 
             case 400: return std::unexpected( error( error_code_t::bad_request_t ) );
             case 404: return std::unexpected( error( error_code_t::app_not_found_t ) );
-            case 401: return std::unexpected( error( error_code_t::user_not_found_t ) );
+            case 401: return std::unexpected( error( error_code_t::unauthorized_t ) );
             case 429: return std::unexpected( error( error_code_t::rate_limited_t ) );
             case 503: return std::unexpected( error( error_code_t::app_paused_t ) );
             default: return std::unexpected( error( error_code_t::server_error_t ) );
@@ -87,31 +101,34 @@ namespace tsar
             return std::unexpected( error( error_code_t::failed_to_get_timestamp_t ) );
 
         // Verify that the HWID matches the user's HWID.
-        if ( data_json[ "hwid" ].get< std::string >() != hwid.c_str() )
+        if ( data_json[ "hwid" ].get< std::string >() != hwid->c_str() )
             return std::unexpected( error( error_code_t::hwid_mismatch_t ) );
 
         const auto timestamp = static_cast< time_t >( data_json[ "timestamp" ].get< uint64_t >() );
-        const auto ntp_timestamp = ntp_client.request_time();
+        const auto ntp_timestamp = ntp.request_time();
+
+        if ( !ntp_timestamp )
+            return std::unexpected( ntp_timestamp.error() );
 
         const auto system_time = std::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );
 
         // Calculate the duration between the NTP timestamp and the system time.
-        const auto duration = std::chrono::seconds( ntp_timestamp > system_time ? ntp_timestamp - system_time : system_time - ntp_timestamp );
+        const auto duration = std::chrono::seconds( *ntp_timestamp > system_time ? *ntp_timestamp - system_time : system_time - *ntp_timestamp );
 
         // If the duration is greater than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
         if ( duration > std::chrono::seconds( 30 ) || timestamp < ( system_time - 30u ) )
             return std::unexpected( error( error_code_t::old_response_t ) );
 
-        if ( !verify_signature( *data, *signature ) )
+        if ( !verify_signature( key, *data, *signature ) )
             return std::unexpected( error( error_code_t::invalid_signature_t ) );
 
         return data_json;
     }
 
-    bool client::verify_signature( const std::string_view json, const std::string_view signature ) const noexcept
+    bool client::verify_signature( const std::string_view key, const std::string_view json, const std::string_view signature ) noexcept
     {
-        const std::uint8_t* data = reinterpret_cast< const std::uint8_t* >( pub_key.data() );
-        std::size_t data_size = pub_key.size();
+        const auto data = reinterpret_cast< const std::uint8_t* >( key.data() );
+        std::size_t data_size = key.size();
 
         // Create the EVP_PKEY structure from the public key
         EVP_PKEY* pkey = d2i_PUBKEY( nullptr, &data, static_cast< long >( data_size ) );
@@ -178,99 +195,62 @@ namespace tsar
         return result == 1;
     }
 
-    std::unique_ptr< client > client::create( const std::string_view app_id, const std::string_view client_key, const std::string_view hostname )
+    result_t< client > client::create( const std::string_view app_id, const std::string_view client_key ) noexcept
     {
-        const auto hwid = system::hwid();
+        if ( app_id.length() != app_id_size )
+            return std::unexpected( error( error_code_t::invalid_app_id_t ) );
 
-        if ( !hwid )
-            throw error( error_code_t::failed_to_get_hwid_t );
+        if ( client_key.length() != client_key_size )
+            return std::unexpected( error( error_code_t::invalid_client_key_t ) );
 
-        std::unique_ptr< client > c( new client( app_id, client_key, *hwid ) );
+        // Attempt to decode the client key from base64.
+        const auto decoded = base64::safe_from_base64( client_key );
 
-        const auto result = c->query( std::format( "initialize?app={}&hwid={}", app_id, *hwid ) );
+        if ( !decoded )
+            return std::unexpected( error( error_code_t::failed_to_decode_public_key_t ) );
 
-        if ( !result )
-        {
-            switch ( static_cast< error_code_t >( result.error().code().value() ) )
-            {
-                case error_code_t::user_not_found_t:
-                {
-                    // If the user is not found then we open the browser to authenticate. They will authenticate with their HWID and restart the
-                    // application.
-                    if ( !system::open_browser( std::format( "https://{}/auth/{}", hostname, *hwid ) ) )
-                        throw error( error_code_t::failed_to_open_browser_t );
-
-                    throw error( error_code_t::unauthorized_t );
-                }
-
-                default: throw result.error();
-            }
-        }
-
-        c->session = ( *result )[ "session" ].get< std::string >();
-        c->subscription = ( *result )[ "subscription" ].template get< subscription_t >();
-
-        return c;
-    }
-
-    std::unique_ptr< client > client::create( const std::string_view app_id, const std::string_view client_key )
-    {
-        return create( app_id, client_key, std::format( "{}.tsar.app", app_id ) );
-    }
-
-    result_t< validation_data_t > client::validate() noexcept
-    {
-        const auto result = query( std::format( "validate?app={}&session={}&hwid={}", app_id, session, hwid ) );
+        // Make the initialization request to the server.
+        const auto result = api_call( *decoded, std::format( "initialize?app_id={}", app_id ) );
 
         if ( !result )
             return std::unexpected( result.error() );
 
-        return ( *result ).template get< validation_data_t >();
+        // Set the dashboard hostname and exit. We don't deserialize the JSON because we only need the hostname.
+        const auto hostname = ( *result )[ "data" ][ "dashboard_hostname" ].template get< std::string >();
+
+        return client( app_id, *decoded, hostname );
     }
 
-    client::client( const std::string_view app_id, const std::string_view client_key, const std::string_view hwid )
+    result_t< user > client::authenticate( bool open ) const noexcept
+    {
+        // Make the authentication request to the server.
+        const auto result = api_call< user >( pub_key, std::format( "authenticate?app_id={}", app_id ) );
+
+        if ( !result )
+        {
+            if ( result.error() == error_code_t::unauthorized_t && open )
+            {
+                // Try and get the HWID associated with the user's system.
+                const auto hwid = system::hwid();
+
+                if ( !hwid )
+                    return std::unexpected( error( error_code_t::failed_to_get_hwid_t ) );
+
+                // Open the user's default browser to prompt a login.
+                if ( !system::open_browser( std::format( "https://{}/auth/{}", hostname, *hwid ) ) )
+                    return std::unexpected( error( error_code_t::failed_to_open_browser_t ) );
+            }
+
+            return std::unexpected( result.error() );
+        }
+
+        return *result;
+    }
+
+    client::client( const std::string_view app_id, const std::string_view pub_key, const std::string_view hostname )
         : app_id( app_id ),
-          hwid( hwid ),
-          ntp_client( "time.cloudflare.com", 123 )
+          pub_key( pub_key ),
+          hostname( hostname )
     {
-        if ( const auto k = base64::safe_from_base64( client_key ) )
-            pub_key = *k;
-        else
-            throw error( error_code_t::failed_to_decode_public_key_t );
-    }
-
-    void from_json( const nlohmann::json& j, user_t& u )
-    {
-        j.at( "id" ).get_to( u.id );
-
-        if ( !j[ "username" ].is_null() )
-            u.username = j.at( "username" ).get< std::string >();
-        else
-            u.username = std::nullopt;
-
-        if ( !j[ "avatar" ].is_null() )
-            u.avatar = j.at( "avatar" ).get< std::string >();
-        else
-            u.avatar = std::nullopt;
-    }
-
-    void from_json( const nlohmann::json& j, subscription_t& s )
-    {
-        j.at( "id" ).get_to( s.id );
-
-        if ( !j[ "expires" ].is_null() )
-            s.expires = std::chrono::system_clock::from_time_t( j.at( "expires" ).get< uint64_t >() );
-        else
-            s.expires = std::nullopt;
-
-        j.at( "user" ).get_to( s.user );
-        j.at( "tier" ).get_to( s.tier );
-    }
-
-    void from_json( const nlohmann::json& j, validation_data_t& v )
-    {
-        j.at( "hwid" ).get_to( v.hwid );
-
-        v.timestamp = std::chrono::system_clock::from_time_t( j.at( "timestamp" ).get< uint64_t >() );
     }
 }  // namespace tsar

@@ -10,6 +10,20 @@ namespace tsar
     {
     }
 
+    error::error( ntp::error_code_t code ) noexcept : error( { static_cast< std::int32_t >( code ), ntp::error_category::get() } )
+    {
+    }
+
+    bool error::operator==( const error_code_t& c ) const noexcept
+    {
+        return strcmp( code().category().name(), "tsar" ) == 0 && code().value() == static_cast< int >( c );
+    }
+
+    bool error::operator!=( const error_code_t& c ) const noexcept
+    {
+        return !( *this == c );
+    }
+
     const error_category& error_category::get() noexcept
     {
         static error_category instance;
@@ -25,13 +39,14 @@ namespace tsar
     {
         switch ( static_cast< error_code_t >( ev ) )
         {
+            case error_code_t::invalid_app_id_t: return "Invalid App ID format. Must be in UUID format.";
+            case error_code_t::invalid_client_key_t: return "Invalid Client Key format. Must be in Base64 format.";
             case error_code_t::failed_to_get_hwid_t: return "Failed to get the user's HWID.";
             case error_code_t::failed_to_open_browser_t: return "Failed to open browser.";
-            case error_code_t::unauthorized_t: return "User is not authorized to use the application.";
             case error_code_t::request_failed_t: return "Request to TSAR server failed.";
             case error_code_t::app_not_found_t: return "App ID not found.";
             case error_code_t::app_paused_t: return "App was paused by the developer.";
-            case error_code_t::user_not_found_t: return "HWID does not match to user.";
+            case error_code_t::unauthorized_t: return "Your HWID is not authorized.";
             case error_code_t::server_error_t: return "TSAR server did not return OK.";
             case error_code_t::bad_request_t: return "The request passed to the TSAR server was bad.";
             case error_code_t::rate_limited_t: return "User has been rate limited.";
@@ -41,6 +56,7 @@ namespace tsar
             case error_code_t::failed_to_decode_data_t: return "Failed to decode data field from parsed JSON body.";
             case error_code_t::failed_to_decode_signature_t: return "Failed to decode signature field from parsed JSON body.";
             case error_code_t::failed_to_decode_public_key_t: return "Failed to decode client key from base64.";
+            case error_code_t::failed_to_decode_session_key_t: return "Failed to decode session key from base64.";
             case error_code_t::failed_to_parse_data_t: return "Failed to parse data field into JSON.";
             case error_code_t::failed_to_get_timestamp_t: return "Failed to get timestamp field.";
             case error_code_t::failed_to_parse_timestamp_t: return "Failed to parse timestamp field into uint64_t.";
