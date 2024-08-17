@@ -74,7 +74,7 @@ namespace tsar
         {
             try
             {
-                return T{ *result };
+                return T{ ( *result )[ "data" ] };
             }
             catch ( const error& e )
             {

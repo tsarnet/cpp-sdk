@@ -122,9 +122,6 @@ namespace tsar
         if ( !verify_signature( key, *data, *signature ) )
             return std::unexpected( error( error_code_t::invalid_signature_t ) );
 
-        if ( data_json.contains( "data" ) )
-            return data_json[ "data" ];
-
         return data_json;
     }
 
@@ -218,8 +215,8 @@ namespace tsar
         if ( !result )
             return std::unexpected( result.error() );
 
-        // Set the dashboard hostname and exit
-        const auto hostname = ( *result )[ "dashboard_hostname" ].template get< std::string >();
+        // Set the dashboard hostname and exit. We don't deserialize the JSON because we only need the hostname.
+        const auto hostname = ( *result )[ "data" ][ "dashboard_hostname" ].template get< std::string >();
 
         return client( app_id, *decoded, hostname );
     }
