@@ -13,6 +13,7 @@
 This is a [CMake](https://cmake.org/) project so it is recommended to use CMake to install the SDK into your wider project. Although, you are free to download the prebuilt static libraries from any of the latest releases.
 
 If you are using CMake, simply add the following lines to your `CMakeLists.txt` file:
+
 ```cmake
 include (FetchContent) # if you don't have this already
 
@@ -48,7 +49,7 @@ int main()
 {
     try
     {
-        // Create the client with the provided credentials. 
+        // Create the client with the provided credentials.
         const auto client = tsar::client::create( app_id, client_key );
 
         // Retrieve the subscription associated with the current user.
@@ -75,7 +76,7 @@ int main()
 
     return 0;
 }
-``` 
+```
 
 ## Contributing
 This project definitely has room for improvement, so we are open to any contribution! Feel free to send a pull request at any time and we will review it ASAP. If you want to contribute but don't know what, take a quick look at our [issues](https://github.com/tsarnet/cpp-sdk-v2/issues) and feel free to take on any of them.
