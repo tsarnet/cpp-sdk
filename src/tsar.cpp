@@ -127,7 +127,7 @@ namespace tsar
 
     bool client::verify_signature( const std::string_view key, const std::string_view json, const std::string_view signature ) noexcept
     {
-        const auto data = reinterpret_cast< const std::uint8_t* >( key.data() );
+        const std::uint8_t* = reinterpret_cast< const std::uint8_t* >( key.data() );
         std::size_t data_size = key.size();
 
         // Create the EVP_PKEY structure from the public key
