@@ -21,7 +21,7 @@ namespace tsar
         /// <summary>
         /// The URL of the TSAR API.
         /// </summary>
-        constexpr static auto api_url = "https://tsar.dev/api/client";
+        constexpr static auto api_url = "https://tsar.cc/api/client";
 
         /// <summary>
         /// The NTP client used to get the current time.
