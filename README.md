@@ -44,12 +44,20 @@ If you are not a CMake user, you will have to manually link the SDK to your proj
 We've designed this library to be lightweight and easy to use. Feel free to take a peek at any of our [examples](/examples), all of them are pretty straightforward. A simple usage example has been attached below:
 
 ```cpp
+#include <iostream>
+
 #include "tsar.hpp"
 
 // You should have gotten these values after creating your app
 // You can find them in your app's configuration settings
 constexpr auto app_id = "00000000-0000-0000-0000-000000000000";
 constexpr auto client_key = "MFk...";
+
+// Basic function to format TSAR errors
+static void error( const std::string_view title, const tsar::error& err ) noexcept
+{
+    std::cerr << "[AUTH] " << title << ": " << err.what() << std::endl;
+}
 
 int main()
 {
@@ -58,7 +66,7 @@ int main()
 
   if (!client)
   {
-      error( "[AUTH] Failed to create client: ", client.error() );
+      error("Failed to create client", client.error());
       return 1;
   }
 
@@ -73,7 +81,7 @@ int main()
       // Only continue the loop if the error type is "Unauthorized".
       if (user.error() != tsar::error_code_t::unauthorized_t)
       {
-          error("[AUTH] Failed to authenticate: ", user.error());
+          error("Failed to authenticate", user.error());
           return 1;
       }
 
@@ -102,7 +110,7 @@ int main()
       std::this_thread::sleep_for( std::chrono::seconds(20));
   }
 
-  error("[AUTH] Heartbeat failed: ", status.error());
+  error("Heartbeat failed", status.error());
   return 1;
 }
 ```
