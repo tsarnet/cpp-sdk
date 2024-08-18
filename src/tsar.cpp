@@ -73,10 +73,10 @@ namespace tsar
         if ( json.is_discarded() )
             return std::unexpected( error( error_code_t::failed_to_parse_body_t ) );
 
-        if ( !json[ "data" ].is_string() )
+        if ( !json.contains( "data" ) || !json[ "data" ].is_string() )
             return std::unexpected( error( error_code_t::failed_to_get_data_t ) );
 
-        if ( !json[ "signature" ].is_string() )
+        if ( !json.contains( "signature" ) || !json[ "signature" ].is_string() )
             return std::unexpected( error( error_code_t::failed_to_get_signature_t ) );
 
         const auto signature = base64::safe_from_base64( json[ "signature" ].get< std::string >() );
@@ -94,10 +94,10 @@ namespace tsar
         if ( data_json.is_discarded() )
             return std::unexpected( error( error_code_t::failed_to_parse_body_t ) );
 
-        if ( !data_json[ "hwid" ].is_string() )
+        if ( !data_json.contains( "hwid" ) || !data_json[ "hwid" ].is_string() )
             return std::unexpected( error( error_code_t::failed_to_parse_data_t ) );
 
-        if ( !data_json[ "timestamp" ].is_number_unsigned() )
+        if ( !data_json.contains( "timestamp" ) || !data_json[ "timestamp" ].is_number_unsigned() )
             return std::unexpected( error( error_code_t::failed_to_get_timestamp_t ) );
 
         // Verify that the HWID matches the user's HWID.
