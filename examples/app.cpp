@@ -53,7 +53,7 @@ int main()
     while ( status = user->heartbeat() )
     {
         std::println( std::cout, "[*] Heartbeat success" );
-        std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+        std::this_thread::sleep_for( std::chrono::seconds( 10 ) );
     }
 
     error( "Heartbeat failed", status.error() );
