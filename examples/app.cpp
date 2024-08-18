@@ -5,9 +5,9 @@
 
 #undef max
 
-constexpr auto app_id = "35f5bc1b-9a6d-442f-8813-6579e443d4be";
+constexpr auto app_id = "f911842b-5b3d-4c59-b5d1-4adb8f71557b";
 constexpr auto client_key =
-    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJ+N6c07hrVdt1FzX3+baICfl7nDIWJ+uMEyN5SA09ulN37mc7maQ8kOBwse9Yr4To5FIKMMx/BQwDTPu+TqvVQ==";
+    "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEvJrwPvdeDUcV8Qr02tzgFrp+8qfCV/vG1HcQJYYV8u5vYUfGABMAYT0qOQltXEX9DTcB2fzLfwQnl7yiAaNruQ==";
 
 static void error( const std::string_view title, const tsar::error& err ) noexcept
 {
