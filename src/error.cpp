@@ -63,7 +63,6 @@ namespace tsar
             case error_code_t::hwid_mismatch_t: return "Local HWID and HWID returned from server don't match.";
             case error_code_t::old_response_t: return "Response is old.";
             case error_code_t::invalid_signature_t: return "Signature is not authentic.";
-            case error_code_t::failed_to_get_hash_t: return "Failed to get program's hash.";
             case error_code_t::hash_unauthorized_t: return "The program hash is not authorized.";
 
             case error_code_t::unexpected_error_t:

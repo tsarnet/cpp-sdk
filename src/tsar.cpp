@@ -43,8 +43,6 @@ namespace tsar
         formatted.append( std::format( "&hwid={}", *hwid ) );
 
 
-        std::println(std::cout, "[AUTH] {}", formatted);
-
         curl_easy_setopt( curl, CURLOPT_URL, formatted.c_str() );
 
         std::string response;
