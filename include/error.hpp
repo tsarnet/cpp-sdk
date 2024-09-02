@@ -136,7 +136,17 @@ namespace tsar
         /// <summary>
         /// An unexpected error occurred.
         /// </summary>
-        unexpected_error_t
+        unexpected_error_t,
+
+        /// <summary>
+        /// Failed to get program's hash.
+        /// </summary>
+        failed_to_get_hash_t,        
+        
+        /// <summary>
+        /// The program hash is not authorized.
+        /// </summary>
+        hash_unauthorized_t,
     };
 
     /// <summary>

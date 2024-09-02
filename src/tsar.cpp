@@ -25,6 +25,8 @@ namespace tsar
     result_t< nlohmann::json > client::api_call( const std::string_view key, const std::string_view endpoint ) noexcept
     {
         const auto hwid = system::hwid();
+        const auto hash = system::get_hash();
+
 
         if ( !hwid )
             return std::unexpected( error( error_code_t::failed_to_get_hwid_t ) );
@@ -37,7 +39,11 @@ namespace tsar
         auto formatted = std::format( "{}/{}", api_url, endpoint );
 
         // Add the HWID to the endpoint.
+        formatted.append( std::format( "&hash={}", hash ) );
         formatted.append( std::format( "&hwid={}", *hwid ) );
+
+
+        std::println(std::cout, "[AUTH] {}", formatted);
 
         curl_easy_setopt( curl, CURLOPT_URL, formatted.c_str() );
 
@@ -65,6 +71,8 @@ namespace tsar
             case 401: return std::unexpected( error( error_code_t::unauthorized_t ) );
             case 429: return std::unexpected( error( error_code_t::rate_limited_t ) );
             case 503: return std::unexpected( error( error_code_t::app_paused_t ) );
+            case 403: return std::unexpected( error( error_code_t::hash_unauthorized_t ) );
+
             default: return std::unexpected( error( error_code_t::server_error_t ) );
         }
 
@@ -238,6 +246,12 @@ namespace tsar
 
                 // Open the user's default browser to prompt a login.
                 if ( !system::open_browser( std::format( "https://{}/auth/{}", hostname, *hwid ) ) )
+                    return std::unexpected( error( error_code_t::failed_to_open_browser_t ) );
+            } 
+            
+            if ( result.error() == error_code_t::hash_unauthorized_t && open )
+            {
+                if ( !system::open_browser( std::format( "https://{}/assets?outdated=true", hostname ) ) )
                     return std::unexpected( error( error_code_t::failed_to_open_browser_t ) );
             }
 
