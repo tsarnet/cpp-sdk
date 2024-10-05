@@ -43,7 +43,7 @@ namespace tsar
 
        public:
         std::string id;
-        std::optional< std::string > username, avatar;
+        std::optional< std::string > name, avatar;
 
         subscription_t subscription;
 

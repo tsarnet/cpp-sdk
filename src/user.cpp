@@ -27,10 +27,10 @@ namespace tsar
         {
             json.at( "id" ).get_to( id );
 
-            if ( json[ "username" ].is_null() )
-                username = std::nullopt;
+            if ( json[ "name" ].is_null() )
+                name = std::nullopt;
             else
-                username = json.at( "username" ).get< std::string >();
+                name = json.at( "name" ).get< std::string >();
 
             if ( json[ "avatar" ].is_null() )
                 avatar = std::nullopt;

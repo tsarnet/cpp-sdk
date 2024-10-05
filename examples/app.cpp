@@ -47,7 +47,7 @@ int main()
 
   // At this point the user is authenticated
   std::println(std::cout, "[AUTH] Successfully authenticated.");
-  std::println(std::cout, "[AUTH] Welcome, {}.", user->username.value_or(user->id));
+  std::println(std::cout, "[AUTH] Welcome, {}.", user->name.value_or(user->id));
 
   // Start a heartbeat loop to continue checking if the user is authorized (we recommend running this in a background thread)
   //
