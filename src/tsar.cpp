@@ -121,8 +121,8 @@ namespace tsar
         // Calculate the duration between the NTP timestamp and the system time.
         const auto duration = std::chrono::seconds( *ntp_timestamp > system_time ? *ntp_timestamp - system_time : system_time - *ntp_timestamp );
 
-        // If the duration is greater than 30 seconds then we have a problem. The user's system time is not in sync with the NTP server.
-        if ( duration > std::chrono::seconds( 30 ) || timestamp < ( system_time - 30u ) )
+        // If the duration is greater than 5 minutes then we have a problem. The user's system time is not in sync with the NTP server.
+        if ( duration > std::chrono::seconds( 300 ) || timestamp < ( system_time - 300u ) )
             return std::unexpected( error( error_code_t::old_response_t ) );
 
         if ( !verify_signature( key, *data, *signature ) )
@@ -245,8 +245,8 @@ namespace tsar
                 // Open the user's default browser to prompt a login.
                 if ( !system::open_browser( std::format( "https://{}/auth/{}", hostname, *hwid ) ) )
                     return std::unexpected( error( error_code_t::failed_to_open_browser_t ) );
-            } 
-            
+            }
+
             if ( result.error() == error_code_t::hash_unauthorized_t && open )
             {
                 if ( !system::open_browser( std::format( "https://{}/assets?outdated=true", hostname ) ) )
