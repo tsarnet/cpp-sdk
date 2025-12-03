@@ -45,6 +45,12 @@ target_link_libraries (tsar PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries (tsar PRIVATE CURL::libcurl)
 target_link_libraries (tsar PUBLIC nlohmann_json::nlohmann_json)
 
+# Link macOS frameworks
+if (APPLE)
+	target_link_libraries (tsar PRIVATE "-framework CoreFoundation")
+	target_link_libraries (tsar PRIVATE "-framework IOKit")
+endif()
+
 
 # Add the source files to the project
 target_sources (tsar PRIVATE

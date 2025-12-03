@@ -2,7 +2,7 @@
 
 ![banner](/banner.png)
 
-> The lastest build of the C++ SDK will only compile if building a Windows application. We are currently working on supporting other systems like Unix/Linux and MacOS.
+> The C++ SDK supports both Windows and macOS. Linux support is coming soon.
 
 * [Installation](#installation)
     * [Static Libraries](#static-libraries)

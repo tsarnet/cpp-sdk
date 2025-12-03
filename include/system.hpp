@@ -14,9 +14,13 @@
 
 #if defined _WIN32 || defined _WIN64 || defined __CYGWIN__
 #include <windows.h>
+#elif defined __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+#include <IOKit/IOKitLib.h>
+#include <mach-o/dyld.h>
+#include <unistd.h>
 #else
-// Note: This is a temporary solution while the API is in development. Eventually we will support other platforms.
-#error "This code can only be compiled on Windows."
+#error "This code can only be compiled on Windows or macOS."
 #endif
 
 
